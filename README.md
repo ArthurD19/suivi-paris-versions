@@ -78,15 +78,17 @@ et Brave.
   copier-coller d'une page. On y colle aussi des **messages de pronos Discord** : l'appli retrouve les paris
   correspondants et les marque « partagés ».
 - **Mes paris** : tous tes paris, avec recherche (« Pogacar », « Lombardie »…) et filtres (**En cours**, Gagné, Perdu,
-  Annulé, Partagés, **Sans sport**, comptes, sports). On y corrige le sport d'un pari, on le change de compte, on le
-  modifie (passer un pari en cours en gagné, corriger une mise ou une cote : la modification est signalée) et on le
-  **partage** : le filtre *Partagés* donne les stats de tes bets partagés et **Télécharger la page publique** en
+  Annulé, Partagés, **Sans sport**, comptes, sports). **＋ Ajouter un pari** saisit un pari à la main (tous les champs :
+  site, dates, sport, sélections, cote, mise, résultat), et **Modifier** corrige n'importe quel pari de la même façon,
+  **date de l'événement** comprise (le jour où il compte dans le calendrier). On y change aussi le sport ou le compte
+  d'un pari, et on le **partage** : le filtre *Partagés* donne les stats de tes bets partagés et **Télécharger la page publique** en
   fait une page à envoyer à ta communauté.
 - **Soldes** : le vrai bilan d'argent de chaque compte : **retiré + encore sur le compte − déposé**, à côté du profit
-  de tes paris. Les soldes et les dépôts et retraits arrivent avec l'extension ; un solde se tape aussi à la main
-  dans la carte du compte.
+  de tes paris. Les soldes et les dépôts et retraits arrivent avec l'extension ; dans la carte de chaque compte, on
+  tape aussi le solde, et on ajoute (ou supprime) un dépôt ou un retrait à la main.
 - **Comptes** : créer, renommer, colorer ou supprimer un compte, et indiquer ta **bankroll** (chaque mise s'affiche
-  alors aussi en % de bankroll).
+  alors aussi en % de bankroll). **Un site que l'appli ne lit pas** (Parions Sport, Zebet…) s'ajoute aussi :
+  *＋ Ajouter un compte* → *＋ Un autre site…* ; ses paris, son solde, ses dépôts et retraits se saisissent à la main.
 - **Mes données** : télécharger une sauvegarde de tes paris (garde-en une ailleurs de temps en temps), exporter en
   CSV pour Excel, l'historique des imports, le thème **clair ou sombre**, et **Rechercher une mise à jour**.
 
@@ -104,8 +106,8 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 - **Paris** : *Mes paris* → onglet **Terminés**, et de temps en temps l'onglet **En cours** : c'est le seul endroit
   où se lit la cote d'un pari (gains possibles ÷ mise), gardée ensuite quand il se règle.
 - **Solde** : relevé à chaque visite. Betclic n'affiche pas quel compte est connecté : si tu as plusieurs comptes
-  Betclic, choisis dans l'icône de l'extension celui qui reçoit les paris et le solde (sinon la page **Soldes**
-  demande à qui est le solde lu).
+  Betclic, l'extension te demande sur la page à quel compte vont les paris et le solde (sans réponse, la page
+  **Soldes** demande à qui est le solde lu).
 - **Dépôts et retraits** : *Mon compte* → l'historique des dépôts, puis celui des retraits.
 - **Tout l'historique d'un coup** : le favori Betclic (page *Importer*) fait défiler l'onglet *Terminés* jusqu'à la
   date choisie. Importe le fichier le jour même : Betclic écrit « Aujourd'hui » et « Hier » au lieu des dates.
@@ -148,7 +150,8 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 - **Paris** : *Mon compte* → *Mes paris*, statut **Réglé**, puis *Recherche*. Le site limite une recherche à un
   mois : refais-la mois par mois, ou utilise le favori ps3838, qui remonte par tranches de 30 jours.
 - **Solde** : relevé à chaque visite.
-- **Dépôts et retraits** : pas encore lus. Le solde, lui, entre dans le bilan de la page **Soldes**.
+- **Dépôts et retraits** : pas encore lus par l'extension : ajoute-les à la main dans la carte du compte (page
+  **Soldes**). Le solde, lui, est relevé.
 
 ### bet365
 
@@ -168,8 +171,10 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 
 - **L'appli est fermée ?** L'extension garde ce qu'elle a lu et l'envoie dès que l'appli s'ouvre (elle réessaie
   chaque minute ; le chiffre sur son icône compte les pages en attente).
-- **Plusieurs comptes sur un même site** : choisis dans l'icône de l'extension celui qui reçoit les paris de ce site
-  (un « ! » rouge tant que ce n'est pas fait). Winamax reconnaît le compte tout seul.
+- **Plusieurs comptes sur un même site** : l'extension demande sur la page sur quel compte tu es connecté, et
+  n'enregistre rien avant ta réponse (un « ! » rouge sur son icône tant que des pages attendent). La réponse vaut
+  pour cet onglet : dans un nouvel onglet, elle redemande, pour ne jamais mettre les paris d'un compte sur un autre.
+  Winamax reconnaît le compte tout seul (au pseudo).
 - **Rien n'arrive ?** Clique sur l'icône de l'extension : elle dit ce qu'elle voit sur la page ouverte (« 12 paris
   repérés », ou qu'elle ne lit pas ce site) et le solde lu, ou pourquoi elle ne l'a pas lu.
 - **Recoller ou rouvrir une page ne crée aucun doublon** ; un pari en cours est mis à jour quand il se règle.
