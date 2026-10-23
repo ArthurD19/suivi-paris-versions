@@ -80,7 +80,9 @@ et Brave.
 - **Mes paris** : tous tes paris, avec recherche (« Pogacar », « Lombardie »…) et filtres (**En cours**, Gagné, Perdu,
   Annulé, Partagés, **Sans sport**, comptes, sports). **＋ Ajouter un pari** saisit un pari à la main (tous les champs :
   site, dates, sport, sélections, cote, mise, résultat), et **Modifier** corrige n'importe quel pari de la même façon,
-  **date de l'événement** comprise (le jour où il compte dans le calendrier). On y change aussi le sport ou le compte
+  **date de l'événement** comprise (le jour où il compte dans le calendrier). La liste est rangée par date de
+  l'événement quand le site la donne (Betclic ; Winamax pour les matchs ; ps3838), avec la date du pari en dessous ;
+  sinon par date du pari. On y change aussi le sport ou le compte
   d'un pari, et on le **partage** : le filtre *Partagés* donne les stats de tes bets partagés et **Télécharger la page publique** en
   fait une page à envoyer à ta communauté.
 - **Soldes** : le vrai bilan d'argent de chaque compte : **retiré + encore sur le compte − déposé**, à côté du profit
@@ -122,6 +124,8 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
   complètent. Ouvre l'historique de compte une fois : ensuite, chaque visite sur winamax.fr en relit la première
   page toute seule (au plus toutes les 20 minutes).
 - **Solde** : relevé à chaque visite. Le compte est reconnu au pseudo, même avec plusieurs comptes Winamax.
+- **Date de l'événement** : *Mes paris* affiche le jour d'un match (« 14/10 ») ; il est retenu (pas pour une course
+  cycliste, dont la page ne donne pas la date).
 - **Dépôts et retraits** : *Mon compte* → *Historique de compte* → onglets **Dépôts** puis **Retraits**, toutes les
   pages. Un retrait pas encore versé (« en attente ») ne compte pas.
 - **Tout l'historique d'un coup** : le favori Winamax lit les pages demandées de l'historique de compte (par exemple
@@ -139,7 +143,8 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 ### PMU
 
 - **Paris** : *Sport* → *Mes paris*, onglet **Tous** ; clique sur *Voir plus* pour remonter. PMU affiche les cotes,
-  pas le sport (deviné à partir du marché ; sinon « Sans sport », à corriger).
+  pas le sport (deviné à partir du marché ; sinon « Sans sport », à corriger). **Clique sur un pari** pour l'ouvrir :
+  son détail donne la date de l'événement et le vrai sport (« Basketball / Australie / NBL »), lus aussitôt.
 - **Solde** : les pages PMU Sport ne l'affichent pas ; il est relevé sur les autres pages de pmu.fr (passe par
   l'accueil).
 - **Dépôts et retraits** : *Mon historique de mouvements*, onglet **Appro / Retrait**.
@@ -148,7 +153,8 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 ### ps3838
 
 - **Paris** : *Mon compte* → *Mes paris*, statut **Réglé**, puis *Recherche*. Le site limite une recherche à un
-  mois : refais-la mois par mois, ou utilise le favori ps3838, qui remonte par tranches de 30 jours.
+  mois : refais-la mois par mois, ou utilise le favori ps3838, qui remonte par tranches de 30 jours. Le jour de
+  l'événement (« … @ 2025-12-14 ») est retenu.
 - **Solde** : relevé à chaque visite.
 - **Dépôts et retraits** : pas encore lus par l'extension : ajoute-les à la main dans la carte du compte (page
   **Soldes**). Le solde, lui, est relevé.
