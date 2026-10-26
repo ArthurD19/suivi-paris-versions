@@ -9,8 +9,9 @@ d'utilisation.
 ## Ce que l'extension lit
 
 L'extension ne fonctionne que sur les sites des bookmakers pris en charge (betclic.fr, winamax.fr, unibet.fr,
-pmu.fr, ps3838.com, bet365.fr et bet365.com). Sur ces sites, et seulement sur les pages que tu ouvres toi-même,
-elle lit le texte affiché :
+pmu.fr, ps3838.com, piwi247.com, olybet.fr, bwin.fr, sportaza.com, bet365.fr et bet365.com, et l'historique des transactions
+d'AsianConnect ; sur netbet.fr, seulement pour le bouton « Copier le texte de la page »). Sur ces sites, et seulement sur les pages que tu ouvres
+toi-même, elle lit le texte affiché :
 
 - l'historique de tes paris (date, événement, sélections, cote, mise, gains, état du pari) ;
 - le solde affiché en haut de la page une fois connecté ;
@@ -34,13 +35,16 @@ chaque site, la mise en pause) et la liste des derniers envois affichée dans so
 
 | Autorisation | Pourquoi |
 | --- | --- |
-| Accès aux sites des bookmakers | Lire tes paris, ton solde, tes dépôts et retraits sur les pages que tu ouvres. |
+| Accès aux sites des bookmakers | Lire tes paris, ton solde, tes dépôts et retraits sur les pages que tu ouvres ; après une mise à jour de l'extension, remettre son script dans les onglets de ces sites déjà ouverts (sans recharger la page). |
 | `http://127.0.0.1:47830` | Envoyer ces informations à l'application Suivi Paris de ton ordinateur. |
 | `storage` | Garder tes réglages, et les pages pas encore envoyées quand l'application est fermée. |
 | `alarms` | Réessayer chaque minute d'envoyer ces pages en attente. |
 | `notifications` | Prévenir quand de nouveaux paris sont arrivés dans l'application. |
 | `clipboardWrite` | Le bouton « Copier le texte de la page », sur les sites qui empêchent de sélectionner le texte. |
 | `activeTab` | Savoir, quand tu cliques sur l'icône, sur quel site tu es, pour dire ce que l'extension y voit. |
+| Autorisation d'un cadre (demandée au clic) | Certains sites affichent les paris dans un cadre venu d'un autre site (Sportaza). Au clic sur *Copier le texte de la page*, Chrome te demande si l'extension peut lire ce site-là ; sans ton accord, rien n'en est lu. |
+| Autorisation d'une adresse de Sportaza (demandée au clic) | Sportaza change d'adresse (« sportaza-5178.com ») : le bouton *Lire ce site automatiquement* demande à Chrome la permission de lire cette adresse-là, et rien d'autre. |
+| `scripting` | Avec `activeTab` : quand tu cliques sur *Copier le texte de la page*, lire le texte de l'onglet ouvert si la page ne répond pas (ouverte avant une mise à jour de l'extension, ou site que l'extension ne suit pas). Seulement à ce clic, et le texte va dans ton presse-papiers, nulle part ailleurs. |
 
 ## L'application
 

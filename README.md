@@ -1,7 +1,7 @@
 # Suivi Paris
 
 Tableau de bord **gratuit** pour suivre tes paris sportifs sur tous tes bookmakers (Betclic, Winamax, Unibet, PMU,
-ps3838, bet365) au même endroit : profit, ROI, courbe de la saison, résultats par sport, par compte, par cote,
+ps3838, bet365, PIWI247, Olybet, bwin) au même endroit : profit, ROI, courbe de la saison, résultats par sport, par compte, par cote,
 soldes, dépôts et retraits.
 
 **Tout reste sur ton ordinateur** : l'appli ne se connecte à aucun bookmaker, ne demande aucun identifiant et
@@ -156,8 +156,7 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
   mois : refais-la mois par mois, ou utilise le favori ps3838, qui remonte par tranches de 30 jours. Le jour de
   l'événement (« … @ 2025-12-14 ») est retenu.
 - **Solde** : relevé à chaque visite.
-- **Dépôts et retraits** : pas encore lus par l'extension : ajoute-les à la main dans la carte du compte (page
-  **Soldes**). Le solde, lui, est relevé.
+- **Dépôts et retraits** : ils passent par AsianConnect (voir plus bas).
 
 ### bet365
 
@@ -172,6 +171,78 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 - **À savoir** : la page n'a pas de référence de pari ; un pari y est reconnu à sa date (à la seconde) et à sa mise.
   Un simple n'y affiche que la sélection et la cote ; des gains qui ne valent pas mise × cote sont comptés en
   cash-out.
+
+### PIWI247
+
+- **Paris** : même logiciel que ps3838, même page : *Mes paris*, statut **Réglé**, puis *Recherche*. L'extension
+  la lit comme celle de ps3838 ; collée à la main, choisis bien le compte PIWI247 (la page ressemble à s'y
+  méprendre à celle de ps3838). La partie *exchange* du site n'est pas encore lue.
+- **Solde** : relevé à chaque visite, comme sur ps3838.
+- **Dépôts et retraits** : ils passent par AsianConnect (voir plus bas).
+
+### Olybet
+
+- **Paris** : *Historique des paris*, choisis la période (90 jours au plus), puis **clique sur chaque pari** pour
+  ouvrir son détail : seul le détail donne la référence du pari, sa cote, ses sélections et la date de
+  l'événement. L'extension enregistre chaque pari dès qu'il est ouvert ; sans elle, ouvre les paris puis copie la
+  page. Un pari dont le détail n'est pas ouvert n'est pas lu.
+- **Solde** : relevé à chaque visite (sous le bouton *Dépôt*).
+- **Dépôts et retraits** : pas encore lus : ajoute-les à la main dans la carte du compte (page **Soldes**).
+
+### bwin
+
+- **Paris** : *Mes paris*, onglets **Ouvert** puis **Évalué** (*Filtre* : choisis la période, 90 jours au plus à
+  la fois). Le site empêche Ctrl+A : l'extension lit la page toute seule (ou son bouton *Copier le texte de la
+  page*). bwin n'affiche ni numéro de pari ni sport : un pari est reconnu à sa date (à la minute), sa mise et son
+  choix, et un pari ouvert est mis à jour quand il passe dans *Évalué* ; le sport est deviné (sinon « Autre », à
+  corriger une fois : les noms déjà vus le corrigent ensuite).
+- **Tout l'historique d'un coup** : sur *Mes paris* → *Évalué*, l'icône de l'extension propose **Lire période par
+  période** depuis une date de début choisie : l'extension remplit elle-même le filtre (90 jours à la fois), clique
+  sur *Afficher résultats*, fait défiler la liste jusqu'en bas (elle se charge au fil du défilement) en envoyant
+  les paris, puis passe aux 90 jours suivants jusqu'à aujourd'hui. Elle ne touche
+  qu'au filtre ; recliquer sur le bouton arrête.
+- **Solde** : relevé à chaque visite (à côté du bouton *Dépôt*).
+- **Dépôts et retraits** : pas encore lus : ajoute-les à la main dans la carte du compte (page **Soldes**).
+
+### AsianConnect (dépôts et retraits ps3838 et PIWI247)
+
+- Le courtier par lequel passent l'argent de ps3838 et de PIWI247 (m.ac0188.com). Pas un compte de l'appli :
+  ouvre *Historique des transactions* et **clique sur chaque transaction** pour la déplier. Seule une transaction
+  dépliée dit quel compte elle concerne (« PS3838 (AC…) », « PIWI247 (PIW_…) ») ; l'extension la range aussitôt
+  sur ce compte, reconnu à son numéro (relevé avec le solde sur ps3838 et PIWI247 ; à défaut, le seul compte de ce
+  bookmaker prend le numéro).
+- Un dépôt va sur le compte, un retrait en sort ; un **transfert** de ps3838 vers PIWI247 est un retrait de l'un et un
+  dépôt sur l'autre. Les refus, les bonus et le portefeuille AsianConnect ne comptent pas.
+
+### Sportaza
+
+- **Langue** : le site en français ou en anglais (selon le compte), les deux sont lus.
+- **Adresse** : Sportaza change d'adresse (« sportaza-5178.com »…). Sur une nouvelle adresse, clique sur l'icône de
+  l'extension puis sur **Lire ce site automatiquement** : Chrome demande la permission, la page se recharge, et
+  l'extension la lit comme les autres sites.
+- **Solde** : relevé à chaque visite (« Solde réel »). Le compte est reconnu au nom du titulaire affiché dans le
+  menu, même avec plusieurs comptes Sportaza.
+- **Dépôts et retraits** : *Historique des transactions*, filtre **Dépôt** et **Retraits** ; les retraits annulés ne
+  comptent pas.
+- **Paris** : *Sport* → *Mes paris*, onglets **Calculé** et **Ouvrir**. L'extension clique elle-même sur *Afficher
+  plus de paris* jusqu'aux paris déjà connus (la première fois : toute la liste). La liste ne montre ni le choix (le
+  coureur, le joueur) ni la date de l'événement : **clique sur un pari** pour l'ouvrir (un à la fois), son détail
+  part aussitôt dans l'appli, et une relecture de la liste fermée ne l'efface pas. Ou laisse faire l'extension :
+  bouton **Ouvrir tous les paris de la page** de son icône. Elle clique sur le titre de chaque pari (jamais sur un
+  bouton, ni « Retirer » ni cash-out), envoie son détail, passe au suivant, et saute ceux déjà ouverts une fois ;
+  recliquer sur le bouton arrête. L'année se déduit du jour de la
+  lecture ; le sport est deviné (« Tour d'Italie » : cyclisme).
+- **Compte en francs suisses** (ou en livres, en dollars) : dans **Comptes**, choisis sa *Monnaie* et ce que vaut
+  1 CHF en euros. Le solde, les dépôts, les retraits et les mises restent en CHF (ceux du site, et ceux que tu tapes),
+  tous les chiffres de l'appli sont en euros à ce taux ; changer le taux recalcule tout. Tant que la monnaie n'est pas
+  réglée, rien n'est enregistré d'un site qui affiche des CHF.
+
+### Bientôt : NetBet
+
+Sa lecture n'est pas encore écrite. L'extension tourne déjà sur ce site, mais seulement pour son bouton
+**Copier le texte de la page** (il empêche Ctrl+A) : ouvre la page voulue (paris terminés dépliés sur NetBet),
+copie son texte avec ce bouton et envoie-le pour que la lecture soit ajoutée. En attendant, crée le compte avec
+« ＋ Un autre site… » (page **Comptes**) et saisis les paris à la main.
 
 ### Bon à savoir
 
