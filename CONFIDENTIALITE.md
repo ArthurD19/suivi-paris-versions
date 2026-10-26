@@ -9,8 +9,8 @@ d'utilisation.
 ## Ce que l'extension lit
 
 L'extension ne fonctionne que sur les sites des bookmakers pris en charge (betclic.fr, winamax.fr, unibet.fr,
-pmu.fr, ps3838.com, piwi247.com, olybet.fr, bwin.fr, sportaza.com, bet365.fr et bet365.com, et l'historique des transactions
-d'AsianConnect ; sur netbet.fr, seulement pour le bouton « Copier le texte de la page »). Sur ces sites, et seulement sur les pages que tu ouvres
+pmu.fr, ps3838.com, piwi247.com, olybet.fr, bwin.fr, sportaza.com, netbet.fr, orbitxch.com, bet365.fr et bet365.com, et l'historique des
+transactions d'AsianConnect). Sur ces sites, et seulement sur les pages que tu ouvres
 toi-même, elle lit le texte affiché :
 
 - l'historique de tes paris (date, événement, sélections, cote, mise, gains, état du pari) ;

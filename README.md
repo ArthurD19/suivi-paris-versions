@@ -1,7 +1,7 @@
 # Suivi Paris
 
 Tableau de bord **gratuit** pour suivre tes paris sportifs sur tous tes bookmakers (Betclic, Winamax, Unibet, PMU,
-ps3838, bet365, PIWI247, Olybet, bwin) au même endroit : profit, ROI, courbe de la saison, résultats par sport, par compte, par cote,
+ps3838, bet365, PIWI247, Olybet, bwin, Sportaza, NetBet, OrbitX) au même endroit : profit, ROI, courbe de la saison, résultats par sport, par compte, par cote,
 soldes, dépôts et retraits.
 
 **Tout reste sur ton ordinateur** : l'appli ne se connecte à aucun bookmaker, ne demande aucun identifiant et
@@ -206,7 +206,7 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 
 ### AsianConnect (dépôts et retraits ps3838 et PIWI247)
 
-- Le courtier par lequel passent l'argent de ps3838 et de PIWI247 (m.ac0188.com). Pas un compte de l'appli :
+- Le courtier par lequel passe l'argent de ps3838, de PIWI247 et d'OrbitX (m.ac0188.com). Pas un compte de l'appli :
   ouvre *Historique des transactions* et **clique sur chaque transaction** pour la déplier. Seule une transaction
   dépliée dit quel compte elle concerne (« PS3838 (AC…) », « PIWI247 (PIW_…) ») ; l'extension la range aussitôt
   sur ce compte, reconnu à son numéro (relevé avec le solde sur ps3838 et PIWI247 ; à défaut, le seul compte de ce
@@ -237,12 +237,26 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
   tous les chiffres de l'appli sont en euros à ce taux ; changer le taux recalcule tout. Tant que la monnaie n'est pas
   réglée, rien n'est enregistré d'un site qui affiche des CHF.
 
-### Bientôt : NetBet
+### NetBet
 
-Sa lecture n'est pas encore écrite. L'extension tourne déjà sur ce site, mais seulement pour son bouton
-**Copier le texte de la page** (il empêche Ctrl+A) : ouvre la page voulue (paris terminés dépliés sur NetBet),
-copie son texte avec ce bouton et envoie-le pour que la lecture soit ajoutée. En attendant, crée le compte avec
-« ＋ Un autre site… » (page **Comptes**) et saisis les paris à la main.
+- **Paris** : *Mon tableau de bord* → *Mes paris* → **Paris terminés** (et *Paris en cours*), page après page :
+  l'extension lit chaque page affichée. Un combiné ne donne ses sélections et sa date qu'ouvert (*Voir les
+  détails*) : le bouton **Ouvrir tous les paris de la page** de l'icône les ouvre tous, puis envoie la page ; un
+  combiné resté fermé n'est pas enregistré (rien n'est inventé).
+- NetBet n'affiche pas la date du pari : c'est celle de l'événement, dont l'année se déduit du jour de la semaine
+  (« sam. 12 sept. ») et de l'ordre de la liste. L'état (une icône) se lit aux gains. Une mise en *crédit de jeu*
+  est signalée dans l'état.
+- **Solde** : relevé à chaque visite (« Réel »).
+- **Dépôts et retraits** : pas encore lus : à la main dans la carte du compte (page **Soldes**).
+
+### OrbitX (exchange)
+
+- **Paris** : *Account* → *My Bets* → **Settled**, période et nombre de résultats par page au choix ; l'extension
+  lit chaque page affichée. Un pari *Back* se compte comme ailleurs. Un pari *Lay* (contre une sélection) compte
+  l'argent risqué (« liability ») comme mise, et son choix est « Contre … » ; sa cote de lay reste dans le marché.
+  Les mises non appariées (*Cancelled*) ne sont pas des paris.
+- **Solde** : relevé à chaque visite (« Balance »), le compte reconnu au pseudo.
+- **Dépôts et retraits** : par AsianConnect, comme ps3838 et PIWI247.
 
 ### Bon à savoir
 
