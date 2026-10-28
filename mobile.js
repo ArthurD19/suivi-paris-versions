@@ -115,12 +115,41 @@ def repondre(methode, chemin, requete, brut):
         window.dispatchEvent(new CustomEvent("suivi-paris-synchro", { detail: bilan }));
       }
     }
+    await viderBoite(cfg, g);
     const base = new Uint8Array(await (await local("GET", "/api/sauvegarde.db")).arrayBuffer());
     const empreinte = enBase64(new Uint8Array(await crypto.subtle.digest("SHA-256", base)));
     if (empreinte !== cfg.empreinte) {
       await github(cfg, "PATCH", `/gists/${cfg.g}`, { files: { [FICHIER_IPHONE]: { content: await chiffrer(cfg, base) } } });
       garderCfg({ empreinte, envoye_le: new Date().toISOString() });
     }
+  }
+  /* La boîte : les pages que l'extension (Orion sur l'iPhone, ou Chrome sans l'appli de l'ordinateur) a déposées,
+     chiffrées. Enregistrées ici comme si l'extension les envoyait, puis retirées (sauf compte à choisir). */
+  const FICHIER_BOITE = "suivi-paris-boite.bin";
+  const ROUTES_BOITE = { page: "/api/extension/importer", solde: "/api/extension/solde", mouvements: "/api/extension/mouvements" };
+  async function lirePages(cfg, f) {
+    if (!f || f.content === "vide") return [];
+    const texte = f.truncated ? await (await fetchReseau(f.raw_url)).text() : f.content;
+    return JSON.parse(new TextDecoder().decode(await dechiffrer(cfg, texte)));
+  }
+  async function viderBoite(cfg, g) {
+    const pages = await lirePages(cfg, (g.files || {})[FICHIER_BOITE]);
+    if (!pages.length) return;
+    const traitees = new Set();
+    let nouveaux = 0;
+    for (const p of pages) {
+      const corps = { texte: p.texte, bookmaker: p.bookmaker, capture_le: p.capture_le, url: p.url, compte_id: p.compte_id || null };
+      let r = {};
+      try { r = await (await local("POST", ROUTES_BOITE[p.type || "page"] || ROUTES_BOITE.page, corps)).json(); } catch { r = { statut: "erreur" }; }
+      if (r.statut !== "choisir_compte" && r.statut !== "aucun_compte") traitees.add(p.id);
+      nouveaux += r.nouveaux || 0;
+    }
+    if (!traitees.size) return;
+    const g2 = await github(cfg, "GET", `/gists/${cfg.g}`);  // relue : l'extension a pu déposer entre-temps
+    const reste = (await lirePages(cfg, (g2.files || {})[FICHIER_BOITE])).filter((p) => !traitees.has(p.id));
+    const contenu = reste.length ? await chiffrer(cfg, new TextEncoder().encode(JSON.stringify(reste))) : "vide";
+    await github(cfg, "PATCH", `/gists/${cfg.g}`, { files: { [FICHIER_BOITE]: { content: contenu } } });
+    window.dispatchEvent(new CustomEvent("suivi-paris-synchro", { detail: { paris_nouveaux: nouveaux, paris_mis_a_jour: 0, boite: traitees.size } }));
   }
   function synchroniser() {
     if (!lireCfg().g || synchroEnCours) return synchroEnCours;

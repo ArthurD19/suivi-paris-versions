@@ -2434,7 +2434,8 @@ function brancherSynchro(main, sy, recharger) {
 // L'iPhone a reçu des paris de l'ordinateur : la page affichée se met à jour.
 window.addEventListener("suivi-paris-synchro", (e) => {
   const b = e.detail || {};
-  toast(`Reçu de l'ordinateur : ${b.paris_nouveaux || 0} nouveau${b.paris_nouveaux > 1 ? "x" : ""} pari${b.paris_nouveaux > 1 ? "s" : ""}, ${b.paris_mis_a_jour || 0} mis à jour.`);
+  toast(b.boite ? `Lu par l'extension : ${b.boite} page${b.boite > 1 ? "s" : ""} enregistrée${b.boite > 1 ? "s" : ""}, ${b.paris_nouveaux || 0} nouveau${b.paris_nouveaux > 1 ? "x" : ""} pari${b.paris_nouveaux > 1 ? "s" : ""}.`
+    : `Reçu de l'ordinateur : ${b.paris_nouveaux || 0} nouveau${b.paris_nouveaux > 1 ? "x" : ""} pari${b.paris_nouveaux > 1 ? "s" : ""}, ${b.paris_mis_a_jour || 0} mis à jour.`);
   if (!document.querySelector("dialog[open]")) { etat.dejaAnime = false; router(); }
 });
 
