@@ -57,8 +57,104 @@ def repondre(methode, chemin, requete, brut):
     const [statut, contenu, type, entetes] = r.toJs({ dict_converter: Object.fromEntries });
     r.destroy();
     repondre.destroy();
-    if (methode !== "GET") await sauver();
+    if (methode !== "GET") { await sauver(); synchroBientot(); }
     return new Response(contenu, { status: statut, headers: { "Content-Type": type, ...entetes } });
+  }
+
+  /* ------------------------------------------------------------------ synchronisation avec l'ordinateur
+     Par le gist secret que l'ordinateur a créé (suivi_paris/synchro.py) : la base de chaque appareil y est compressée
+     et chiffrée (AES-256-GCM) ; la clé vient du code de liaison et ne quitte pas les deux appareils. */
+  const API = "https://api.github.com";
+  const FICHIER_PC = "suivi-paris-pc.bin", FICHIER_IPHONE = "suivi-paris-iphone.bin";
+  const lireCfg = () => { try { return JSON.parse(localStorage.getItem("synchro") || "{}"); } catch { return {}; } };
+  const garderCfg = (m) => { const c = { ...lireCfg(), ...m }; try { localStorage.setItem("synchro", JSON.stringify(c)); } catch { /* plein */ } return c; };
+  let erreurSynchro = null, synchroEnCours = null, minuteurSynchro = null;
+  const enBase64 = (o) => { let b = ""; for (let i = 0; i < o.length; i += 0x8000) b += String.fromCharCode(...o.subarray(i, i + 0x8000)); return btoa(b); };
+  const deBase64 = (t) => Uint8Array.from(atob(t), (c) => c.charCodeAt(0));
+  const flux = async (octets, transformation) => new Uint8Array(await new Response(new Blob([octets]).stream().pipeThrough(transformation)).arrayBuffer());
+  async function cle(cfg) { return crypto.subtle.importKey("raw", deBase64(cfg.k), "AES-GCM", false, ["encrypt", "decrypt"]); }
+  async function chiffrer(cfg, octets) {
+    const nonce = crypto.getRandomValues(new Uint8Array(12));
+    const c = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, await cle(cfg), await flux(octets, new CompressionStream("gzip"))));
+    const tout = new Uint8Array(12 + c.length); tout.set(nonce); tout.set(c, 12);
+    return enBase64(tout);
+  }
+  async function dechiffrer(cfg, texte) {
+    const b = deBase64(texte.trim());
+    let clair;
+    try { clair = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b.subarray(0, 12) }, await cle(cfg), b.subarray(12)); }
+    catch { throw new Error("données illisibles : relie à nouveau l'iPhone avec le code de l'ordinateur"); }
+    return flux(new Uint8Array(clair), new DecompressionStream("gzip"));
+  }
+  async function github(cfg, methode, chemin, corps) {
+    const r = await fetchReseau(API + chemin, { method: methode, headers: { Authorization: `Bearer ${cfg.t}`, Accept: "application/vnd.github+json",
+      ...(corps ? { "Content-Type": "application/json" } : {}) }, body: corps ? JSON.stringify(corps) : undefined }).catch(() => null);
+    if (!r) throw new Error("pas de connexion");
+    if (r.status === 401 || r.status === 403) throw new Error("GitHub refuse le jeton : relie à nouveau l'iPhone");
+    if (r.status === 404) throw new Error("le gist de synchronisation n'existe plus : relie à nouveau l'iPhone");
+    if (!r.ok) throw new Error(`GitHub a répondu ${r.status}`);
+    return r.json();
+  }
+  async function local(methode, chemin, corps) {
+    const r = await servir(methode, new URL(chemin, location.href), corps === undefined ? null : JSON.stringify(corps));
+    return r;
+  }
+  async function cycleSynchro() {
+    let cfg = lireCfg();
+    if (!cfg.g) return;
+    const g = await github(cfg, "GET", `/gists/${cfg.g}`);
+    const f = (g.files || {})[FICHIER_PC];
+    if (f && f.content !== "vide" && f.raw_url !== cfg.pc) {
+      const texte = f.truncated ? await (await fetchReseau(f.raw_url)).text() : f.content;
+      const base = await dechiffrer(cfg, texte);
+      const r = await local("POST", "/api/fusionner", { base: enBase64(base) });
+      if (!r.ok) throw new Error((await r.json()).erreur || "fusion impossible");
+      const bilan = await r.json();
+      cfg = garderCfg({ pc: f.raw_url, recu_le: new Date().toISOString(), pc_vu_le: g.updated_at });
+      if (bilan.paris_nouveaux || bilan.paris_mis_a_jour || bilan.comptes_nouveaux || bilan.mouvements_nouveaux) {
+        window.dispatchEvent(new CustomEvent("suivi-paris-synchro", { detail: bilan }));
+      }
+    }
+    const base = new Uint8Array(await (await local("GET", "/api/sauvegarde.db")).arrayBuffer());
+    const empreinte = enBase64(new Uint8Array(await crypto.subtle.digest("SHA-256", base)));
+    if (empreinte !== cfg.empreinte) {
+      await github(cfg, "PATCH", `/gists/${cfg.g}`, { files: { [FICHIER_IPHONE]: { content: await chiffrer(cfg, base) } } });
+      garderCfg({ empreinte, envoye_le: new Date().toISOString() });
+    }
+  }
+  function synchroniser() {
+    if (!lireCfg().g || synchroEnCours) return synchroEnCours;
+    synchroEnCours = cycleSynchro().then(() => { erreurSynchro = null; }, (e) => { erreurSynchro = String(e.message || e); })
+      .finally(() => { synchroEnCours = null; });
+    return synchroEnCours;
+  }
+  function synchroBientot() { clearTimeout(minuteurSynchro); minuteurSynchro = setTimeout(synchroniser, 5000); }
+  pret.then(() => {
+    synchroniser();
+    setInterval(() => { if (document.visibilityState === "visible") synchroniser(); }, 90000);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") synchroniser(); });
+  });
+  // Les routes de la synchronisation, côté iPhone : servies ici (le Python n'en sait rien).
+  function etatSynchro() {
+    const c = lireCfg();
+    return { actif: Boolean(c.g), mobile: true, envoye_le: c.envoye_le || null, recu_le: c.recu_le || null,
+      pc_vu_le: c.pc_vu_le || null, erreur: erreurSynchro, possible: Boolean(window.crypto && crypto.subtle && window.CompressionStream) };
+  }
+  async function routeSynchro(methode, url, corps) {
+    const json = (o, statut = 200) => new Response(JSON.stringify(o), { status: statut, headers: { "Content-Type": "application/json" } });
+    if (methode === "GET") return json(etatSynchro());
+    const c = corps ? JSON.parse(corps) : {};
+    if (url.pathname.endsWith("/desactiver")) { try { localStorage.removeItem("synchro"); } catch { /* rien */ } return json(etatSynchro()); }
+    if (!url.pathname.endsWith("/maintenant")) {
+      const code = String(c.code || "").trim();
+      let lien;
+      try { lien = JSON.parse(atob(code.replace(/^SP1-/, "").replace(/-/g, "+").replace(/_/g, "/"))); } catch { lien = null; }
+      if (!lien || !lien.g || !lien.t || !lien.k) return json({ erreur: "Code de liaison illisible : recopie-le depuis l'ordinateur (Mes données)." }, 400);
+      try { localStorage.removeItem("synchro"); } catch { /* rien */ }
+      garderCfg(lien);
+    }
+    await synchroniser();
+    return erreurSynchro ? json({ erreur: `Synchronisation : ${erreurSynchro}` }, 400) : json(etatSynchro());
   }
 
   // Les appels de app.js à « /api/… » sont servis ici ; le reste (fichiers de l'appli) passe normalement.
@@ -66,6 +162,7 @@ def repondre(methode, chemin, requete, brut):
   window.fetch = async (entree, options = {}) => {
     const url = new URL(typeof entree === "string" ? entree : entree.url, location.href);
     if (!/\/api\//.test(url.pathname)) return fetchReseau(entree, options);
+    if (/\/api\/synchro/.test(url.pathname)) return routeSynchro((options.method || "GET").toUpperCase(), url, options.body);
     return servir((options.method || "GET").toUpperCase(), url, options.body);
   };
 

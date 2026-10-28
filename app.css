@@ -925,3 +925,11 @@ body.mobile-app .quitter, body.mobile-app .menu a[data-page="iphone"] { display:
 .chargement-mobile .barre { width: 220px; height: 6px; border-radius: 6px; background: var(--trait); margin: 16px auto 0; overflow: hidden; }
 .chargement-mobile .barre i { display: block; height: 100%; width: 30%; background: var(--peloton); border-radius: 6px; animation: aller 1.2s ease-in-out infinite; }
 @keyframes aller { 0% { transform: translateX(-100%); } 100% { transform: translateX(340%); } }
+
+/* Synchronisation avec l'autre appareil */
+.statut-synchro { margin: 0 0 12px; font-size: 13px; font-weight: 700; }
+.statut-synchro.ok { color: var(--gain); } .statut-synchro.ko { color: var(--perte); }
+.liaison { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.qr-liaison { background: #fff; padding: 8px; border-radius: 12px; line-height: 0; }
+.qr-liaison svg { width: 150px; height: 150px; }
+.liaison > div:last-child { flex: 1; min-width: 220px; }

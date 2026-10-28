@@ -2377,13 +2377,75 @@ async function chercherMiseAJour(bouton, zone) {
 }
 
 /* ===================================================================== données */
+/* La synchronisation avec l'autre appareil (suivi_paris/synchro.py, mobile/mobile.js) : sur l'ordinateur, un jeton
+   GitHub l'active et donne le code de liaison ; sur l'iPhone, ce code la branche. */
+const quandSynchro = (iso) => (iso ? fmtDateHeure.format(new Date(iso)) : "jamais");
+function blocSynchro(sy) {
+  const autre = etat.app.mobile ? "l'ordinateur" : "l'iPhone";
+  const statut = sy.actif ? `<p class="statut-synchro ${sy.erreur ? "ko" : "ok"}">${sy.erreur ? `⚠ ${esc(sy.erreur)}`
+    : `● Synchronisée · envoyée le ${esc(quandSynchro(sy.envoye_le))} · reçue de ${autre} le ${esc(quandSynchro(sy.recu_le))}`}</p>` : "";
+  let corps;
+  if (!sy.possible) corps = `<p class="note">${etat.app.mobile ? "Ce téléphone ne permet pas le chiffrement (iOS 16.4 ou plus récent)." : "Il manque le module de chiffrement : relance l'appli (il s'installe tout seul)."}</p>`;
+  else if (etat.app.mobile && !sy.actif) corps = `<p class="discret" style="margin:0 0 12px">Sur l'ordinateur : <b>Mes données → Avec l'iPhone</b>, copie le code de liaison (ou scanne son QR code avec l'appareil photo, puis « Copier »), et colle-le ici.</p>
+    <form class="actions" id="form-synchro"><input class="saisie" name="code" placeholder="SP1-…" autocomplete="off" aria-label="Code de liaison" style="flex:1;min-width:0">
+      <button class="bouton" type="submit">Lier</button></form>`;
+  else if (!sy.actif) corps = `<p class="discret" style="margin:0 0 10px">Tes paris passent tout seuls entre l'ordinateur et l'iPhone, chiffrés : GitHub (où ils transitent, dans un gist secret) ne voit qu'un fichier illisible ; la clé n'est que sur tes deux appareils.</p>
+    <ol class="etapes-favori" style="margin-bottom:12px">
+      <li><a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Suivi%20Paris" target="_blank" rel="noopener">Crée un jeton GitHub</a> : coche seulement <b>gist</b>, expiration <b>No expiration</b>, puis <b>Generate token</b>.</li>
+      <li>Colle-le ici et active :</li></ol>
+    <form class="actions" id="form-synchro"><input class="saisie" name="jeton" placeholder="ghp_…" autocomplete="off" aria-label="Jeton GitHub" style="flex:1;min-width:0">
+      <button class="bouton" type="submit">Activer</button></form>`;
+  else corps = `${!etat.app.mobile && sy.code ? `<div class="liaison">${sy.qr ? `<div class="qr-liaison">${sy.qr}</div>` : ""}<div>
+      <p class="discret" style="margin:0 0 8px">Sur l'iPhone : <b>Mes données → Avec l'ordinateur</b>, colle ce code (ou scanne le QR code avec l'appareil photo, puis « Copier »). Il donne accès à tes paris : ne le partage avec personne.</p>
+      <div class="actions" style="margin:0"><button type="button" class="bouton" data-copier-code>Copier le code de liaison</button></div></div></div>` : ""}
+    <div class="actions"><button type="button" class="bouton secondaire" data-synchro-maintenant>Synchroniser maintenant</button>
+      <button type="button" class="bouton fantome danger" data-synchro-couper>${etat.app.mobile ? "Délier" : "Désactiver"}</button></div>`;
+  return `<section class="panneau" id="synchro">
+    <h2 style="margin-bottom:8px">Avec ${etat.app.mobile ? "l'ordinateur" : "l'iPhone"}</h2>${statut}${corps}</section>`;
+}
+function brancherSynchro(main, sy, recharger) {
+  const form = $("#form-synchro", main);
+  if (form) form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const b = $("button", form);
+    b.disabled = true;
+    try {
+      await api("/api/synchro", { methode: "POST", corps: etat.app.mobile ? { code: form.code.value } : { jeton: form.jeton.value } });
+      toast(etat.app.mobile ? "iPhone lié à l'ordinateur" : "Synchronisation activée : copie le code de liaison sur l'iPhone");
+      recharger();
+    } catch (err) { toast(err.message, true); b.disabled = false; }
+  });
+  const copier = $("[data-copier-code]", main);
+  if (copier) copier.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(sy.code); toast("Code de liaison copié"); } catch { toast("Copie impossible", true); }
+  });
+  const maintenant = $("[data-synchro-maintenant]", main);
+  if (maintenant) maintenant.addEventListener("click", async () => {
+    maintenant.disabled = true;
+    try { await api("/api/synchro/maintenant", { methode: "POST", corps: {} }); toast("Synchronisation lancée"); setTimeout(recharger, 2500); }
+    catch (err) { toast(err.message, true); maintenant.disabled = false; }
+  });
+  const couper = $("[data-synchro-couper]", main);
+  if (couper) couper.addEventListener("click", async () => {
+    try { await api("/api/synchro/desactiver", { methode: "POST", corps: {} }); toast("Synchronisation coupée"); recharger(); }
+    catch (err) { toast(err.message, true); }
+  });
+}
+// L'iPhone a reçu des paris de l'ordinateur : la page affichée se met à jour.
+window.addEventListener("suivi-paris-synchro", (e) => {
+  const b = e.detail || {};
+  toast(`Reçu de l'ordinateur : ${b.paris_nouveaux || 0} nouveau${b.paris_nouveaux > 1 ? "x" : ""} pari${b.paris_nouveaux > 1 ? "s" : ""}, ${b.paris_mis_a_jour || 0} mis à jour.`);
+  if (!document.querySelector("dialog[open]")) { etat.dejaAnime = false; router(); }
+});
+
 async function pageDonnees(main) {
   await chargerEtat();
   const imports = await api("/api/imports");
+  const sy = etat.app.distant || etat.app.demo ? null : await api("/api/synchro").catch(() => null);
   main.innerHTML = `
     <div class="entete"><div><h1>Mes données</h1><p>${etat.app.mobile
-      ? "Tout reste dans ce téléphone : l'appli ne se connecte à aucun bookmaker et n'envoie rien sur Internet."
-      : "Tout reste sur cet ordinateur : l'appli ne se connecte à aucun bookmaker et n'envoie rien sur Internet (elle ne contacte GitHub que quand tu cherches une mise à jour)."}</p></div>${bandeauDemo()}</div>
+      ? `Tout reste dans ce téléphone : l'appli ne se connecte à aucun bookmaker${sy && sy.actif ? " ; seule la synchronisation avec l'ordinateur passe par Internet, chiffrée" : " et n'envoie rien sur Internet"}.`
+      : `Tout reste sur cet ordinateur : l'appli ne se connecte à aucun bookmaker et n'envoie rien sur Internet${sy && sy.actif ? ", sauf la synchronisation chiffrée avec l'iPhone" : ""} (elle contacte aussi GitHub quand tu cherches une mise à jour).`}</p></div>${bandeauDemo()}</div>
     <div class="pile">
       <section class="panneau">
         <h2 style="margin-bottom:8px">Ta base de paris</h2>
@@ -2393,14 +2455,15 @@ async function pageDonnees(main) {
           <a class="bouton secondaire" href="/api/export.csv" download>Exporter en CSV (Excel)</a>
         </div>
       </section>
-      ${etat.app.distant ? "" : `<section class="panneau" id="synchro">
-        <h2 style="margin-bottom:8px">${etat.app.mobile ? "Avec l'ordinateur" : "Avec l'iPhone"}</h2>
+      ${sy ? blocSynchro(sy) : ""}
+      ${etat.app.distant ? "" : `<section class="panneau" id="synchro-fichier">
+        <h2 style="margin-bottom:8px">Par un fichier</h2>
         <p class="discret" style="margin:0 0 12px">${etat.app.mobile
-          ? "Envoie tes paris à l'ordinateur (le fichier s'ouvre dans le menu de partage : AirDrop, iCloud Drive…), ou récupère ceux de l'ordinateur. Rien n'est perdu ni doublé : seuls les paris, comptes et mouvements en plus sont ajoutés."
-          : "Pour l'iPhone : télécharge la sauvegarde ci-dessus et mets-la dans iCloud Drive (ou AirDrop) ; sur l'iPhone, Mes données → Récupérer. Et dans l'autre sens, ajoute ici le fichier envoyé par l'iPhone. Rien n'est perdu ni doublé."}</p>
+          ? "Sans synchronisation : envoie tes paris à l'ordinateur (menu de partage : AirDrop, iCloud Drive…), ou récupère ceux de l'ordinateur."
+          : "Sans synchronisation : télécharge la sauvegarde ci-dessus pour l'iPhone, ou ajoute ici le fichier envoyé par l'iPhone."} Rien n'est perdu ni doublé.</p>
         <div class="actions">
-          ${etat.app.mobile ? `<a class="bouton" href="/api/sauvegarde.db" download>Envoyer à l'ordinateur</a>` : ""}
-          <label class="bouton ${etat.app.mobile ? "secondaire" : ""}" for="fichier-fusion">${etat.app.mobile ? "Récupérer depuis l'ordinateur" : "Ajouter les paris de l'iPhone"}</label>
+          ${etat.app.mobile ? `<a class="bouton secondaire" href="/api/sauvegarde.db" download>Envoyer à l'ordinateur</a>` : ""}
+          <label class="bouton secondaire" for="fichier-fusion">${etat.app.mobile ? "Récupérer depuis l'ordinateur" : "Ajouter les paris de l'iPhone"}</label>
           <input type="file" id="fichier-fusion" accept=".db,application/octet-stream,application/x-sqlite3" hidden>
         </div>
       </section>`}
@@ -2437,6 +2500,7 @@ async function pageDonnees(main) {
   $$("[data-theme-choix]", main).forEach((bt) => bt.addEventListener("click", () => choisirTheme(bt.dataset.themeChoix)));
   const chercher = $("#chercher-maj", main);
   if (chercher) chercher.addEventListener("click", () => chercherMiseAJour(chercher, $("#maj", main)));
+  if (sy) brancherSynchro(main, sy, () => pageDonnees(main));
   // Une base de l'autre appareil (iPhone ou ordinateur), ajoutée à celle-ci.
   const fusion = $("#fichier-fusion");
   if (fusion) fusion.addEventListener("change", async () => {
