@@ -574,7 +574,7 @@ async function pageTableau(main) {
       <div class="heros-haut">
         <div>
           <div class="resultat" id="resultat">${euros(k.profit, { signe: true, rond: Math.abs(k.profit) >= 1000 })}</div>
-          <div class="resultat-legende">de profit sur ${euros(k.mise, { rond: true })} misés${k.n_freebets ? `, dont ${euros(k.profit_freebets, { signe: true, rond: true })} de ${k.n_freebets} freebet${k.n_freebets > 1 ? "s" : ""}` : ""}${etat.app.bankroll ? `, soit <b>${k.profit > 0 ? "+" : ""}${miseEnPct(k.profit, { seul: true })}</b> de ta bankroll (${euros(etat.app.bankroll, { rond: true })})` : ""}</div>
+          <div class="resultat-legende">de profit sur ${euros(k.mise, { rond: true })} misés${k.n_freebets && Math.round(k.profit_freebets) ? `, dont ${euros(k.profit_freebets, { signe: true, rond: true })} de ${k.n_freebets} freebet${k.n_freebets > 1 ? "s" : ""}` : ""}${etat.app.bankroll ? `, soit <b>${k.profit > 0 ? "+" : ""}${miseEnPct(k.profit, { seul: true })}</b> de ta bankroll (${euros(etat.app.bankroll, { rond: true })})` : ""}</div>
         </div>
         <div class="stats">
           <div class="stat"><b>${pct(k.roi)}</b><span>ROI</span></div>
@@ -1033,7 +1033,7 @@ async function pageImporter(main) {
           <div class="etape-titre"><span class="num">2</span><h2>Colle ta page d'historique</h2></div>
           <div class="zone-collage">
             <textarea id="texte" spellcheck="false" aria-label="Texte de la page d'historique">${esc(im.texte)}</textarea>
-            <div class="invite" id="invite" ${im.texte ? "hidden" : ""}><div><b>Colle ici</b>${etat.app.mobile ? "La page copiée avec le signet Suivi Paris : touche longuement ici, puis <b>Coller</b>.<br>"
+            <div class="invite" id="invite" ${im.texte ? "hidden" : ""}><div><b>Colle ici</b>${etat.app.mobile ? "La page copiée avec l'extension (Copier le texte de la page) : touche longuement ici, puis <b>Coller</b>.<br>"
               : "Sur la page du bookmaker : <kbd>Ctrl</kbd> + <kbd>A</kbd>, puis <kbd>Ctrl</kbd> + <kbd>C</kbd>.<br>Puis ici : <kbd>Ctrl</kbd> + <kbd>V</kbd> (<kbd>⌘</kbd> sur Mac).<br>"}<small>Ou tes messages de pronos Discord (« Meeus @6.5 (0.25%) ») : ils sont reliés à tes paris.</small></div></div>
           </div>
           <p class="consigne" id="consigne">${bk.map((b) => `<b>${esc(b.libelle)}</b> : ${esc(b.consigne.split(". ")[0].replace(/^Sur [^:]+: /, ""))}.`).join("<br>")}</p>
@@ -1185,42 +1185,35 @@ function brancherGuide(racine) {
   });
 }
 
-/* iPhone : un favori Safari copie la page du bookmaker (même là où le site bloque la sélection, et avec ses cadres du
-   même site) ; on la colle ici. */
-const FAVORI_IPHONE = "javascript:" + encodeURIComponent(`(()=>{const t=[document.body.innerText];for(const f of document.querySelectorAll("iframe")){try{if(f.contentDocument&&f.contentDocument.body)t.push(f.contentDocument.body.innerText)}catch(e){}}const x="=== Page : "+location.href+" ===\n"+t.join("\n");const ok=()=>alert("Suivi Paris : page copiée. Ouvre Suivi Paris et touche « Coller ».");navigator.clipboard.writeText(x).then(ok,()=>{const a=document.createElement("textarea");a.value=x;document.body.append(a);a.select();document.execCommand("copy");a.remove();ok()})})()`);
+/* Sur l'iPhone : l'extension Suivi Paris dans Orion lit tes pages de paris, tu envoies quand tu veux, et la
+   synchronisation les amène ici (extension/, suivi_paris/synchro.py). Coller une page reste possible, en secours. */
 function methodesIphone() {
   return `<div class="methodes">
     <section class="panneau methode principale">
-      <div class="methode-tete"><span class="methode-num">1</span><div><h2>Le favori Safari</h2><span class="badge nouveau">Une fois</span></div></div>
-      <p>Sur la page du bookmaker, un favori copie toute la page pour toi, même là où le site empêche de sélectionner.</p>
-      <ol class="etapes-favori">
-        <li><button type="button" class="bouton petit" data-copier-favori>Copier le code du favori</button></li>
-        <li>Dans Safari, ajoute un signet sur n'importe quelle page (<b>Partager → Ajouter un signet</b>), nomme-le « Suivi Paris ».</li>
-        <li>Ouvre tes signets, <b>Modifier</b> ce signet, et remplace son adresse par le code copié.</li>
-      </ol>
+      <div class="methode-tete"><span class="methode-num">1</span><div><h2>Lis tes paris avec l'extension</h2><span class="badge nouveau">Automatique</span></div></div>
+      <p>Dans <b>Orion</b>, avec l'extension Suivi Paris liée à ta synchronisation, ouvre <b>Mes paris</b> sur le site du bookmaker (et l'accueil, pour le solde). La page est lue toute seule en quelques secondes.</p>
+      <p class="discret petit">Ce qui est lu reste dans l'extension, rangé dans <b>Prêt à envoyer</b> (••• → Suivi Paris), avec le détail des paris.</p>
     </section>
     <section class="panneau methode">
-      <div class="methode-tete"><span class="methode-num">2</span><h2>À chaque fois</h2></div>
-      <p>Sur ta page de paris (ou de dépôts), touche la barre d'adresse, puis le signet <b>Suivi Paris</b>. Reviens ici et touche <b>Coller</b>.</p>
-      <button type="button" class="bouton" data-coller>Coller la page copiée</button>
+      <div class="methode-tete"><span class="methode-num">2</span><h2>Envoie vers l'appli</h2></div>
+      <p>Quand tout est prêt, touche <b>Envoyer vers l'appli</b> : sur le site, dans la fenêtre Suivi Paris, ou dans celle de l'extension. Tout part en une fois, chiffré.</p>
+    </section>
+    <section class="panneau methode">
+      <div class="methode-tete"><span class="methode-num">3</span><h2>Ouvre l'appli</h2></div>
+      <p>À l'ouverture, la synchronisation récupère ce qui a été envoyé et l'enregistre. Pas besoin d'attendre :</p>
+      <button type="button" class="bouton" data-recuperer>Récupérer maintenant</button>
     </section>
   </div>`;
 }
 function brancherIphone(main) {
-  const copier = $("[data-copier-favori]", main);
-  if (copier) copier.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(FAVORI_IPHONE); toast("Code du favori copié : colle-le comme adresse du signet."); }
-    catch { toast("Copie impossible ici.", true); }
-  });
-  const coller = $("[data-coller]", main);
-  if (coller) coller.addEventListener("click", async () => {
+  const recuperer = $("[data-recuperer]", main);
+  if (recuperer) recuperer.addEventListener("click", async () => {
+    recuperer.disabled = true;
     try {
-      const texte = await navigator.clipboard.readText();
-      const zone = $("#texte");
-      zone.value = texte;
-      zone.dispatchEvent(new Event("input"));
-      zone.scrollIntoView({ behavior: "smooth", block: "center" });
-    } catch { toast("Touche longuement la zone « Colle ici » ci-dessous, puis « Coller ».", true); }
+      await api("/api/synchro/maintenant", { methode: "POST", corps: {} });
+      toast("Synchronisation faite : les paris envoyés sont enregistrés");
+    } catch (err) { toast(err.message, true); }
+    setTimeout(() => { recuperer.disabled = false; }, 4000);
   });
 }
 
@@ -1477,24 +1470,25 @@ async function pageParis(main) {
     </div>
     <section class="panneau">
       ${r.lignes.length ? `<div class="table-defile"><table>
-        <thead><tr><th title="Date de l'événement quand le site l'affiche (le jour où le pari compte), sinon date du pari">Date</th><th>Compte</th><th>Sport</th><th>Pari</th><th>État</th><th class="nombre">Mise</th><th class="nombre">Cote</th><th class="nombre">Gains</th><th class="nombre">Profit</th><th><span class="visuellement-cache">Actions</span></th></tr></thead>
+        <thead><tr><th title="Date de l'événement quand le site l'affiche (le jour où le pari compte), sinon date du pari">Date</th><th>Pari</th><th>Compte</th><th>Sport</th><th>État</th><th class="nombre">Mise</th><th class="nombre">Cote</th><th class="nombre">Gains</th><th class="nombre">Profit</th><th><span class="visuellement-cache">Actions</span></th></tr></thead>
         <tbody>${r.lignes.map((l) => {
           const memes = etat.app.comptes.filter((c) => c.bookmaker === l.bookmaker);
           return `<tr data-bookmaker="${esc(l.bookmaker)}" data-reference="${esc(l.reference)}">
             <td class="petit cellule-date">${celluleDate(l)}</td>
-            <td><select data-champ="compte" aria-label="Compte">${memes.map((c) =>
+            <td class="cellule-pari"><div class="pari-titre">${sportEmoji(l.sport)} ${esc(l.resume)}</div><div class="pari-sous">${esc(l.categorie_marche)}</div></td>
+            <td class="cellule-compte"><select data-champ="compte" aria-label="Compte">${memes.map((c) =>
               `<option value="${c.id}" ${c.id === l.compte_id ? "selected" : ""}>${esc(c.nom)} (${esc(libelleBookmaker(c.bookmaker))})</option>`).join("")}</select></td>
-            <td><select data-champ="sport" aria-label="Sport">${[...new Set([l.sport, ...sports])].map((s) =>
+            <td class="cellule-sport"><select data-champ="sport" aria-label="Sport">${[...new Set([l.sport, ...sports])].map((s) =>
               `<option ${s === l.sport ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></td>
-            <td><div class="pari-titre">${sportEmoji(l.sport)} ${esc(l.resume)}</div><div class="pari-sous">${esc(l.categorie_marche)}</div></td>
-            <td><span class="badge ${esc(l.etat)}">${esc(LIBELLES_ETATS[l.etat] || l.etat)}</span>${l.modifie_main || l.champs_corriges ? ` <span class="marque-ticket modifie" title="Modifié à la main">✎</span>` : ""}${l.manuel ? ` <span class="marque-ticket manuel" title="Ajouté à la main">main</span>` : ""}</td>
-            <td class="nombre">${euros(miseJouee(l))}${marqueFreebet(l)}${etat.app.bankroll ? `<div class="pct-bk">${miseEnPct(miseJouee(l), { seul: true })}</div>` : ""}</td>
-            <td class="nombre">${coteAffichee(l)}</td>
-            <td class="nombre">${l.gains === null ? "—" : euros(l.gains)}</td>
-            <td class="nombre ${classeSigne(l.profit)}"><b>${l.profit === null ? "—" : euros(l.profit, { signe: true })}</b></td>
+            <td class="cellule-etat"><span class="badge ${esc(l.etat)}">${esc(LIBELLES_ETATS[l.etat] || l.etat)}</span>${l.modifie_main || l.champs_corriges ? ` <span class="marque-ticket modifie" title="Modifié à la main">✎</span>` : ""}${l.manuel ? ` <span class="marque-ticket manuel" title="Ajouté à la main">main</span>` : ""}</td>
+            <td class="nombre" data-libelle="Mise">${euros(miseJouee(l))}${marqueFreebet(l)}${etat.app.bankroll ? `<div class="pct-bk">${miseEnPct(miseJouee(l), { seul: true })}</div>` : ""}</td>
+            <td class="nombre" data-libelle="Cote">${coteAffichee(l)}</td>
+            <td class="nombre" data-libelle="Gains">${l.gains === null ? "—" : euros(l.gains)}</td>
+            <td class="nombre ${classeSigne(l.profit)}" data-libelle="Profit"><b>${l.profit === null ? "—" : euros(l.profit, { signe: true })}</b></td>
             <td class="actions-ligne">
               <button type="button" class="bascule-public" data-public aria-pressed="${Boolean(l.partage)}" title="${l.partage ? `Partagé le ${esc(fmtDateHeure.format(new Date(l.partage_le)))}${l.partage_source ? ` (${esc(l.partage_source)})` : ""} : clique pour le retirer du suivi public` : "Ajouter au suivi public"}">${l.partage_source && l.partage_source.startsWith("Discord") ? "💬 Discord" : "🔗 Public"}</button>
               <button type="button" class="bouton fantome petit" data-modifier>Modifier</button>
+              <button type="button" class="bouton fantome petit danger" data-supprimer-ligne title="Supprimer ce pari">Supprimer</button>
             </td>
           </tr>`;
         }).join("")}</tbody></table></div>
@@ -1546,6 +1540,10 @@ async function pageParis(main) {
   $$("[data-modifier]", main).forEach((b) => b.addEventListener("click", () => {
     const tr = b.closest("tr");
     ouvrirModification(parCle.get(`${tr.dataset.bookmaker}|${tr.dataset.reference}`), relancer);
+  }));
+  $$("[data-supprimer-ligne]", main).forEach((b) => b.addEventListener("click", () => {
+    const tr = b.closest("tr");
+    supprimerPari(parCle.get(`${tr.dataset.bookmaker}|${tr.dataset.reference}`), relancer);
   }));
   $("#ajouter-pari").addEventListener("click", () => formulairePari(null, relancer));
   const relancerPage1 = () => { p.page = 1; relancer(); };
@@ -1769,6 +1767,7 @@ function ticketHTML(l, { actions = true } = {}) {
     ${actions ? `<div class="ticket-actions">
       <button type="button" class="bouton fantome petit" data-modifier>Modifier</button>
       <button type="button" class="bouton fantome petit" data-partager aria-pressed="${Boolean(l.partage)}">${l.partage ? "Ne plus partager" : "Partager"}</button>
+      <button type="button" class="bouton fantome petit danger" data-supprimer-ticket>Supprimer</button>
     </div>` : ""}
   </article>`;
 }
@@ -1781,6 +1780,8 @@ function brancherTickets(conteneur, lignes, apres) {
     if (!l) return;
     const m = $("[data-modifier]", t);
     if (m) m.addEventListener("click", () => ouvrirModification(l, apres));
+    const s = $("[data-supprimer-ticket]", t);
+    if (s) s.addEventListener("click", () => supprimerPari(l, apres));
     const p = $("[data-partager]", t);
     if (p) p.addEventListener("click", async () => {
       try {
@@ -1791,6 +1792,20 @@ function brancherTickets(conteneur, lignes, apres) {
       } catch (err) { toast(err.message, true); }
     });
   });
+}
+
+/* Supprimer un pari, après confirmation. Un pari importé ne revient pas : l'appli garde sa référence et l'ignore aux
+   imports suivants (et sur l'autre appareil, avec la synchronisation). */
+async function supprimerPari(l, apres) {
+  if (!l) return;
+  const quoi = `${l.resume || "ce pari"} (${libelleBookmaker(l.bookmaker)}, réf. ${l.reference})`;
+  if (!confirm(`Supprimer ${quoi} ?${l.manuel ? "" : "\n\nIl ne reviendra pas, même si le site l'affiche encore."}`)) return;
+  try {
+    await api("/api/paris/supprimer", { methode: "POST", corps: { bookmaker: l.bookmaker, reference: l.reference } });
+    toast("Pari supprimé");
+    etat.dejaAnime = false;
+    apres();
+  } catch (err) { toast(err.message, true); }
 }
 
 function dialogue(contenu, classe = "") {
@@ -1880,7 +1895,7 @@ function formulairePari(l, apres) {
       </div>
       ${l && !l.manuel ? `<p class="note" style="margin-top:12px">Ce que tu corriges ici (dates, sélections, sport, cote boostée, freebet) n'est plus remplacé par les imports. Le résultat (état, mise, cote, gains) suit le bookmaker dès qu'un import montre le pari réglé.${l.modifie_main && l.valeurs_import ? ` Le bookmaker indiquait : ${esc(LIBELLES_ETATS_TICKET[l.valeurs_import.etat] || l.valeurs_import.etat)}, mise ${euros(l.valeurs_import.mise)}${l.valeurs_import.gains !== null ? `, gains ${euros(l.valeurs_import.gains)}` : ""}.` : ""}</p>` : ""}
       <div class="actions"><button class="bouton" type="submit">${nouveau ? "Ajouter le pari" : "Enregistrer"}</button><button class="bouton fantome" type="button" data-fermer>Annuler</button>
-        ${l && l.manuel ? `<button class="bouton fantome danger" type="button" data-supprimer-pari style="margin-left:auto">Supprimer ce pari</button>` : ""}</div>
+        ${l ? `<button class="bouton fantome danger" type="button" data-supprimer-pari style="margin-left:auto">Supprimer ce pari</button>` : ""}</div>
     </form>`);
   const f = $("form", d);
   const zoneSel = $(".selections-saisie", d);
@@ -1925,16 +1940,7 @@ function formulairePari(l, apres) {
   const evtInitial = f.date_evenement.value;
   $$("[data-fermer]", d).forEach((b) => b.addEventListener("click", () => d.close()));
   const supprimer = $("[data-supprimer-pari]", d);
-  if (supprimer) supprimer.addEventListener("click", async () => {
-    if (!confirm("Supprimer ce pari ajouté à la main ?")) return;
-    try {
-      await api("/api/paris/supprimer", { methode: "POST", corps: { bookmaker: l.bookmaker, reference: l.reference } });
-      d.close();
-      toast("Pari supprimé");
-      etat.dejaAnime = false;
-      apres();
-    } catch (err) { toast(err.message, true); }
-  });
+  if (supprimer) supprimer.addEventListener("click", () => supprimerPari(l, () => { d.close(); apres(); }));
   f.addEventListener("submit", async (e) => {
     e.preventDefault();
     const simple = type === "simple";
@@ -2132,7 +2138,7 @@ async function pageArgent(main) {
         <div class="etape-titre" style="margin-top:22px"><span class="num">2</span><h2>Colle la page</h2></div>
         <div class="zone-collage">
           <textarea id="ar-texte" spellcheck="false" aria-label="Texte de la page des dépôts ou des retraits">${esc(ar.texte)}</textarea>
-          <div class="invite" id="ar-invite" ${ar.texte ? "hidden" : ""}><div><b>Colle ici</b>La page de tes dépôts, ou celle de tes retraits : ${etat.app.mobile ? "copiée avec le signet Suivi Paris, puis touche longuement ici et <b>Coller</b>."
+          <div class="invite" id="ar-invite" ${ar.texte ? "hidden" : ""}><div><b>Colle ici</b>La page de tes dépôts, ou celle de tes retraits : ${etat.app.mobile ? "copiée avec l'extension (Copier le texte de la page), puis touche longuement ici et <b>Coller</b>."
             : "<kbd>Ctrl</kbd> + <kbd>A</kbd>, <kbd>Ctrl</kbd> + <kbd>C</kbd>, puis <kbd>Ctrl</kbd> + <kbd>V</kbd> ici."}</div></div>
         </div>
         <p class="consigne">Une page à la fois : d'abord les dépôts, puis les retraits. Seuls les mouvements validés comptent ; recoller une page ne crée pas de doublon.</p>
@@ -2457,7 +2463,7 @@ async function pageDonnees(main) {
         </div>
       </section>
       ${sy ? blocSynchro(sy) : ""}
-      ${etat.app.distant ? "" : `<section class="panneau" id="synchro-fichier">
+      ${etat.app.distant || etat.app.mobile ? "" : `<section class="panneau" id="synchro-fichier">
         <h2 style="margin-bottom:8px">Par un fichier</h2>
         <p class="discret" style="margin:0 0 12px">${etat.app.mobile
           ? "Sans synchronisation : envoie tes paris à l'ordinateur (menu de partage : AirDrop, iCloud Drive…), ou récupère ceux de l'ordinateur."

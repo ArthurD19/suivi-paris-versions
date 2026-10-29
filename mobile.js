@@ -8,21 +8,35 @@
   const DOSSIER = "/donnees";
   const ecran = document.createElement("div");
   ecran.className = "chargement-mobile";
-  ecran.innerHTML = `<div><b>Suivi Paris</b><span id="chargement-texte">Préparation de l'appli…</span><div class="barre"><i></i></div>
-    <p class="discret petit" style="margin-top:14px">La première fois, l'appli se télécharge (environ 30 Mo) ; ensuite elle s'ouvre même sans réseau.</p></div>`;
-  const texte = (t) => { const e = document.getElementById("chargement-texte"); if (e) e.textContent = t; };
+  ecran.innerHTML = `<div class="chargement-carte">
+      <img src="icone.png" alt="" width="72" height="72">
+      <b>Suivi Paris</b>
+      <div class="barre" role="progressbar" aria-label="Chargement"><i></i></div>
+      <span id="chargement-texte">Démarrage</span>
+    </div>`;
+  // L'avancement, en quatre étapes : la barre avance avec elles.
+  const ETAPES = ["Démarrage", "Chargement", "Statistiques", "Tes paris"];
+  const texte = (t) => {
+    const e = document.getElementById("chargement-texte");
+    if (e) e.textContent = t;
+    const i = ETAPES.indexOf(t);
+    if (i >= 0) ecran.style.setProperty("--avance", `${Math.round(((i + 1) / ETAPES.length) * 100)}%`);
+  };
   document.addEventListener("DOMContentLoaded", () => document.body.append(ecran));
+
+  // Pas de zoom au pincement (Safari ignore parfois la consigne de la page) : l'appli garde la taille de l'écran.
+  document.addEventListener("gesturestart", (e) => e.preventDefault(), { passive: false });
 
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
   let py = null;
   const pret = (async () => {
-    texte("Chargement de Python…");
+    texte("Chargement");
     py = await loadPyodide({ indexURL: new URL("pyodide/", location.href).href });
-    texte("Chargement des statistiques…");
+    texte("Statistiques");
     await py.loadPackage(["numpy", "pandas", "sqlite3", "python-dateutil", "pytz", "six"]);
-    texte("Ouverture de tes paris…");
+    texte("Tes paris");
     py.FS.mkdirTree(DOSSIER);
     py.FS.mount(py.FS.filesystems.IDBFS, {}, DOSSIER);
     await new Promise((ok, ko) => py.FS.syncfs(true, (e) => (e ? ko(e) : ok())));
@@ -42,8 +56,13 @@ def repondre(methode, chemin, requete, brut):
     return statut, contenu, type_, entetes or {}
 `);
     await sauver();
-    ecran.remove();
-  })().catch((e) => { texte(`L'appli n'a pas pu démarrer : ${e.message || e}. Recharge la page.`); throw e; });
+    ecran.classList.add("fini");
+    setTimeout(() => ecran.remove(), 350);
+  })().catch((e) => {
+    ecran.classList.add("erreur");
+    texte(`L'appli n'a pas pu démarrer (${e.message || e}). Ferme-la et rouvre-la.`);
+    throw e;
+  });
 
   // Après chaque écriture : la base est recopiée dans le stockage du téléphone.
   let enCours = Promise.resolve();

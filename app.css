@@ -728,7 +728,7 @@ td .pct-bk { font-size: 12px; }
 .groupe-argent > summary:hover { background: var(--peloton-clair); }
 .groupe-argent > summary .titre-bk { margin: 0; font-size: 18px; }
 .resume-argent { margin-left: auto; display: flex; gap: 22px; text-align: right; }
-.resume-argent > span { display: flex; flex-direction: column; }
+.resume-argent > span { display: flex; flex-direction: column; align-items: flex-end; min-width: 118px; }
 .resume-argent small { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--brume); font-weight: 700; }
 .resume-argent b { font-family: var(--chiffres); font-style: italic; font-stretch: 112%; font-weight: 800; font-size: 18px; }
 .groupe-argent .chevron { width: 10px; height: 10px; border-right: 2px solid var(--brume); border-bottom: 2px solid var(--brume); transform: rotate(45deg); transition: transform .2s; margin-left: 4px; }
@@ -736,7 +736,14 @@ td .pct-bk { font-size: 12px; }
 .groupe-argent > .pile { padding: 0 16px 16px; }
 .groupe-argent .carte-argent { box-shadow: none; border: 1px solid var(--trait); }
 @media (prefers-reduced-motion: reduce) { .groupe-argent .chevron { transition: none; } }
-@media (max-width: 640px) { .resume-argent { margin-left: 0; width: 100%; justify-content: space-between; text-align: left; } }
+/* Petit écran : Solde à gauche, Bilan à droite, chacun aligné sur son bord, d'un bookmaker à l'autre. */
+@media (max-width: 640px) {
+  .resume-argent { margin-left: 0; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .resume-argent > span { min-width: 0; }
+  .resume-argent > span:first-child { align-items: flex-start; text-align: left; }
+  .resume-argent > span:last-child { align-items: flex-end; text-align: right; }
+}
+.resume-argent b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .solde-attente { border-left: 5px solid var(--jaune); }
 .solde-attente p { margin: 0 0 10px; }
 .solde-attente .actions { margin: 0 0 6px; }
@@ -919,12 +926,18 @@ h3 { font-weight: 700; font-stretch: 104%; }
 /* Appli iPhone */
 .etapes-favori { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 8px; font-size: 14px; }
 body.mobile-app .quitter, body.mobile-app .menu a[data-page="iphone"] { display: none !important; }
+/* L'écran de démarrage de l'appli iPhone : l'icône, le nom, une barre fine qui avance par étapes. */
 .chargement-mobile { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: var(--fond); color: var(--encre);
-  text-align: center; padding: 24px; }
-.chargement-mobile b { font-family: var(--titre); font-style: italic; font-size: 26px; display: block; margin-bottom: 8px; }
-.chargement-mobile .barre { width: 220px; height: 6px; border-radius: 6px; background: var(--trait); margin: 16px auto 0; overflow: hidden; }
-.chargement-mobile .barre i { display: block; height: 100%; width: 30%; background: var(--peloton); border-radius: 6px; animation: aller 1.2s ease-in-out infinite; }
-@keyframes aller { 0% { transform: translateX(-100%); } 100% { transform: translateX(340%); } }
+  text-align: center; padding: 24px; transition: opacity .3s ease; --avance: 8%; }
+.chargement-mobile.fini { opacity: 0; pointer-events: none; }
+.chargement-carte { display: grid; justify-items: center; gap: 14px; animation: apparaitre .5s ease both; }
+.chargement-carte img { width: 72px; height: 72px; border-radius: 18px; box-shadow: 0 10px 30px rgba(36, 80, 245, .25); }
+.chargement-carte b { font-family: var(--titre); font-style: italic; font-stretch: 112%; font-weight: 800; font-size: 28px; letter-spacing: -.01em; }
+.chargement-mobile .barre { width: 160px; height: 3px; border-radius: 3px; background: var(--trait); overflow: hidden; margin-top: 6px; }
+.chargement-mobile .barre i { display: block; height: 100%; width: var(--avance); background: var(--peloton); border-radius: 3px; transition: width .6s ease; }
+#chargement-texte { font-family: var(--mono, ui-monospace, monospace); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--brume); }
+.chargement-mobile.erreur #chargement-texte { text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--perte); max-width: 280px; }
+@keyframes apparaitre { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* Synchronisation avec l'autre appareil */
 .statut-synchro { margin: 0 0 12px; font-size: 13px; font-weight: 700; }
@@ -933,3 +946,32 @@ body.mobile-app .quitter, body.mobile-app .menu a[data-page="iphone"] { display:
 .qr-liaison { background: #fff; padding: 8px; border-radius: 12px; line-height: 0; }
 .qr-liaison svg { width: 150px; height: 150px; }
 .liaison > div:last-child { flex: 1; min-width: 220px; }
+
+/* Appli iPhone : rien ne déborde sur les côtés, et un champ touché ne fait pas zoomer Safari (16 px au moins). */
+html:has(body.mobile-app), body.mobile-app { overflow-x: hidden; max-width: 100%; overscroll-behavior-x: none; }
+body.mobile-app { touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; }
+body.mobile-app input, body.mobile-app select, body.mobile-app textarea, body.mobile-app .saisie { font-size: 16px; }
+body.mobile-app main, body.mobile-app .panneau, body.mobile-app .pile { min-width: 0; max-width: 100%; }
+
+/* Mes paris sur petit écran : une carte par pari plutôt qu'un tableau à faire défiler sur le côté.
+   Ordre : la date, l'intitulé, puis le compte et le sport, l'état, les montants, les actions. */
+@media (max-width: 720px) {
+  .panneau .table-defile:has(td.cellule-pari) { overflow: visible; }
+  .table-defile:has(td.cellule-pari) table, .table-defile:has(td.cellule-pari) tbody { display: block; width: 100%; }
+  .table-defile:has(td.cellule-pari) thead { display: none; }
+  .table-defile:has(td.cellule-pari) tr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 10px;
+    padding: 14px 0; border-bottom: 1px solid var(--trait); }
+  .table-defile:has(td.cellule-pari) tr:last-child { border-bottom: 0; }
+  .table-defile:has(td.cellule-pari) td { display: block; padding: 0; border: 0; min-width: 0; }
+  .table-defile:has(td.cellule-pari) .cellule-date { grid-column: 1 / -1; order: 1; color: var(--brume); }
+  .table-defile:has(td.cellule-pari) .cellule-pari { grid-column: 1 / -1; order: 2; }
+  .table-defile:has(td.cellule-pari) .pari-titre { min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+  .table-defile:has(td.cellule-pari) .cellule-compte { grid-column: 1 / 3; order: 3; }
+  .table-defile:has(td.cellule-pari) .cellule-sport { grid-column: 3 / 5; order: 4; }
+  .table-defile:has(td.cellule-pari) .cellule-compte select, .table-defile:has(td.cellule-pari) .cellule-sport select { width: 100%; }
+  .table-defile:has(td.cellule-pari) .cellule-etat { grid-column: 1 / -1; order: 5; }
+  .table-defile:has(td.cellule-pari) td.nombre { order: 6; text-align: left; }
+  .table-defile:has(td.cellule-pari) td.nombre::before { content: attr(data-libelle); display: block; font-size: 10.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em; color: var(--brume); }
+  .table-defile:has(td.cellule-pari) .actions-ligne { grid-column: 1 / -1; order: 7; display: flex; flex-wrap: wrap; gap: 6px; }
+}
