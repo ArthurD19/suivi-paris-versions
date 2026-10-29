@@ -1,7 +1,7 @@
 /* Suivi Paris sur l'iPhone : tout est gardé dans le téléphone à la première ouverture (l'appli, Python, les
    statistiques), pour s'ouvrir ensuite sans réseau. Une nouvelle version (VERSION, mise par outils/mobile.py)
    remplace l'ancienne. Les données ne passent jamais par ici : elles sont dans IndexedDB. */
-const VERSION = "1.4.1";
+const VERSION = "1.5.0";
 const CACHE = `suivi-paris-${VERSION}`;
 
 self.addEventListener("install", (e) => { self.skipWaiting(); });

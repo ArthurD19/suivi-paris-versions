@@ -90,6 +90,11 @@ def repondre(methode, chemin, requete, brut):
     const r = await fetchReseau(API + chemin, { method: methode, headers: { Authorization: `Bearer ${cfg.t}`, Accept: "application/vnd.github+json",
       ...(corps ? { "Content-Type": "application/json" } : {}) }, body: corps ? JSON.stringify(corps) : undefined }).catch(() => null);
     if (!r) throw new Error("pas de connexion");
+    if (r.status === 403) {  // jeton sans droit, ou GitHub qui limite le nombre d'appels (passager)
+      const message = String((await r.json().catch(() => ({}))).message || "");
+      if (/rate limit/i.test(message) || r.headers.get("x-ratelimit-remaining") === "0")
+        throw new Error("GitHub limite les synchronisations pour l'instant : réessaie dans une heure, rien n'est perdu");
+    }
     if (r.status === 401 || r.status === 403) throw new Error("GitHub refuse le jeton : relie à nouveau l'iPhone");
     if (r.status === 404) throw new Error("le gist de synchronisation n'existe plus : relie à nouveau l'iPhone");
     if (!r.ok) throw new Error(`GitHub a répondu ${r.status}`);
@@ -134,6 +139,7 @@ def repondre(methode, chemin, requete, brut):
   /* La boîte : les pages que l'extension (Orion sur l'iPhone, ou Chrome sans l'appli de l'ordinateur) a déposées,
      chiffrées. Enregistrées ici comme si l'extension les envoyait, puis retirées (sauf compte à choisir). */
   const FICHIER_BOITE = "suivi-paris-boite.bin";
+  const FICHIER_ACCUSES = "suivi-paris-accuses.bin";
   const ROUTES_BOITE = { page: "/api/extension/importer", solde: "/api/extension/solde", mouvements: "/api/extension/mouvements" };
   async function lirePages(cfg, f) {
     if (!f || f.content === "vide") return [];
@@ -144,19 +150,30 @@ def repondre(methode, chemin, requete, brut):
     const pages = await lirePages(cfg, (g.files || {})[FICHIER_BOITE]);
     if (!pages.length) return;
     const traitees = new Set();
+    const accuses = [];  // ce que l'appli a fait de chaque page, lu par l'extension (suivi-paris-accuses.bin)
     let nouveaux = 0;
     for (const p of pages) {
       const corps = { texte: p.texte, bookmaker: p.bookmaker, capture_le: p.capture_le, url: p.url, compte_id: p.compte_id || null, compte_nom: p.compte_nom || null };
       let r = {};
       try { r = await (await local("POST", ROUTES_BOITE[p.type || "page"] || ROUTES_BOITE.page, corps)).json(); } catch { r = { statut: "erreur" }; }
-      if (r.statut !== "choisir_compte" && r.statut !== "aucun_compte") traitees.add(p.id);
+      if (r.statut !== "choisir_compte" && r.statut !== "aucun_compte") {
+        traitees.add(p.id);
+        accuses.push({ id: p.id, type: p.type || "page", bookmaker: p.bookmaker, statut: r.statut, compte: r.compte || null,
+          nouveaux: r.nouveaux || 0, mis_a_jour: r.mis_a_jour || 0, deja_connus: r.deja_connus || 0, solde: r.solde ?? null,
+          details: (r.details || []).slice(0, 25), le: new Date().toISOString() });
+      }
       nouveaux += r.nouveaux || 0;
     }
     if (!traitees.size) return;
     const g2 = await github(cfg, "GET", `/gists/${cfg.g}`);  // relue : l'extension a pu déposer entre-temps
     const reste = (await lirePages(cfg, (g2.files || {})[FICHIER_BOITE])).filter((p) => !traitees.has(p.id));
     const contenu = reste.length ? await chiffrer(cfg, new TextEncoder().encode(JSON.stringify(reste))) : "vide";
-    await github(cfg, "PATCH", `/gists/${cfg.g}`, { files: { [FICHIER_BOITE]: { content: contenu } } });
+    const fichiers = { [FICHIER_BOITE]: { content: contenu } };
+    try {  // les accusés : un souci de lecture ne bloque pas la boîte
+      const anciens = await lirePages(cfg, (g2.files || {})[FICHIER_ACCUSES]);
+      fichiers[FICHIER_ACCUSES] = { content: await chiffrer(cfg, new TextEncoder().encode(JSON.stringify([...accuses, ...anciens].slice(0, 60)))) };
+    } catch { /* gardés pour la prochaine fois */ }
+    await github(cfg, "PATCH", `/gists/${cfg.g}`, { files: fichiers });
     window.dispatchEvent(new CustomEvent("suivi-paris-synchro", { detail: { paris_nouveaux: nouveaux, paris_mis_a_jour: 0, boite: traitees.size } }));
   }
   function synchroniser() {
