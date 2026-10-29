@@ -952,10 +952,15 @@ body.mobile-app .quitter, body.mobile-app .menu a[data-page="iphone"] { display:
 .statut-synchro { margin: 0 0 12px; font-size: 13px; font-weight: 700; }
 .statut-synchro.ok { color: var(--gain); } .statut-synchro.ko { color: var(--perte); }
 .liaison { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
-.explication-telephone { margin: 0 0 16px; padding: 12px 14px; border-radius: 14px; background: var(--fond); border: 1px solid var(--trait); }
-.explication-telephone summary { cursor: pointer; font-weight: 800; }
-.explication-telephone[open] summary { margin-bottom: 8px; }
-.sous-titre-synchro { font-size: 15px; margin: 4px 0 6px; }
+/* Le guide de l'appli téléphone (Mes données, sur l'ordinateur) : long, lisible, par étapes. */
+.guide-telephone { margin: 0 0 16px; padding: 14px 18px; border-radius: 16px; background: var(--fond); border: 1px solid var(--trait); font-size: 14px; line-height: 1.55; }
+.guide-telephone summary { cursor: pointer; font-weight: 800; font-size: 15px; }
+.guide-telephone[open] summary { margin-bottom: 10px; }
+.guide-telephone h4 { font-family: var(--titre); font-size: 15px; margin: 18px 0 6px; padding-top: 12px; border-top: 1px solid var(--trait); }
+.guide-telephone p { margin: 0 0 8px; }
+.guide-telephone ol, .guide-telephone ul { margin: 0 0 8px; padding-left: 22px; display: grid; gap: 5px; }
+.guide-telephone a { overflow-wrap: anywhere; }
+.guide-telephone code { font-family: var(--mono); font-size: 12.5px; }
 .liaison > div:last-child { flex: 1; min-width: 220px; }
 
 /* Appli iPhone : rien ne déborde sur les côtés, et un champ touché ne fait pas zoomer Safari (16 px au moins). */
@@ -986,3 +991,9 @@ body.mobile-app main, body.mobile-app .panneau, body.mobile-app .pile { min-widt
     text-transform: uppercase; letter-spacing: .05em; color: var(--brume); }
   .table-defile:has(td.cellule-pari) .actions-ligne { grid-column: 1 / -1; order: 7; display: flex; flex-wrap: wrap; gap: 6px; }
 }
+
+/* Une nouvelle version de l'appli (ordinateur) : un bandeau discret en bas, au-dessus du reste. */
+.bandeau-maj { position: fixed; right: 20px; bottom: 20px; z-index: 60; display: flex; align-items: center; gap: 12px; max-width: min(520px, calc(100vw - 40px));
+  padding: 12px 12px 12px 16px; border-radius: 16px; background: var(--carte); color: var(--encre); box-shadow: var(--ombre); border: 1px solid var(--trait); font-size: 14px; }
+.bandeau-maj span { flex: 1; }
+.fermer-maj { border: 0; background: none; color: var(--brume); font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 6px; }

@@ -2395,17 +2395,86 @@ async function chercherMiseAJour(bouton, zone) {
 /* La synchronisation avec l'autre appareil (suivi_paris/synchro.py, mobile/mobile.js) : sur l'ordinateur, un jeton
    GitHub l'active et donne le code de liaison ; sur l'iPhone, ce code la branche. */
 const quandSynchro = (iso) => (iso ? fmtDateHeure.format(new Date(iso)) : "jamais");
-/* Sur l'ordinateur : comment avoir l'appli sur le téléphone. `relie` : la synchronisation est déjà active. */
+/* Sur l'ordinateur : le guide complet pour avoir l'appli sur le téléphone, de GitHub à l'extension dans Orion.
+   `relie` : la synchronisation est déjà active (le guide reste là, replié). */
 function explicationTelephone(relie = false) {
   const adresse = etat.app.adresse_iphone;
-  return `<details class="explication-telephone" ${relie ? "" : "open"}><summary>L'appli sur ton téléphone</summary>
-    <ol class="etapes-favori">
-      ${relie ? "" : "<li>Relie l'ordinateur à GitHub, ci-dessous : c'est par là que les paris passent d'un appareil à l'autre.</li>"}
-      <li>Sur l'iPhone, ouvre <a href="${esc(adresse)}" target="_blank" rel="noopener">${esc(adresse.replace("https://", ""))}</a> dans <b>Safari</b>, puis <b>Partager → Sur l'écran d'accueil</b>. Ouvre l'appli depuis cette icône : elle tourne dans le téléphone, tes paris y restent.</li>
-      <li>Dans l'appli : <b>Mes données → Avec l'ordinateur</b>, colle le code de liaison. Elle récupère alors tous tes paris, et tout ce que tu fais d'un côté arrive de l'autre.</li>
-      <li>Pour lire tes paris depuis le téléphone : le navigateur <b>Orion</b> (App Store) avec l'extension Suivi Paris, liée avec le même code.</li>
+  const lienAppli = `<a href="${esc(adresse)}" target="_blank" rel="noopener">${esc(adresse.replace("https://", ""))}</a>`;
+  const lienExtension = `<a href="${esc(adresse)}suivi-paris-extension.zip" target="_blank" rel="noopener">${esc(adresse.replace("https://", ""))}suivi-paris-extension.zip</a>`;
+  return `<details class="guide-telephone" ${relie ? "" : "open"}><summary>Le guide complet : l'appli sur ton iPhone${relie ? " (déjà relié)" : ""}</summary>
+    <p>Une fois en place, tu as tes paris dans ta poche, même ordinateur éteint, et tu peux les lire depuis le site du bookmaker sur ton téléphone. Compte une quinzaine de minutes, une seule fois.</p>
+    <p><b>Il te faut</b> : ton iPhone, cet ordinateur avec Suivi Paris, et un compte GitHub (gratuit).</p>
+
+    <h4>GitHub : à quoi ça sert ?</h4>
+    <p>L'ordinateur et le téléphone ne peuvent pas se parler directement. Ils passent par <b>GitHub</b>, un site de Microsoft où l'on range des fichiers, qui sert ici de <b>boîte aux lettres</b> : Suivi Paris y crée un <b>gist secret</b>, un fichier privé de ton compte que personne ne trouve sans son adresse. Chaque appareil y dépose ses paris et récupère ceux de l'autre.</p>
+    <p>Tout est <b>chiffré avant de partir</b> (AES-256) : GitHub ne voit qu'un fichier illisible, et la clé n'existe que sur tes appareils. Le <b>jeton</b> que tu vas créer est une clé qui permet seulement à Suivi Paris d'écrire dans tes gists : rien d'autre de ton compte.</p>
+
+    <h4>Étape 1 · Créer ton compte GitHub</h4>
+    <ol>
+      <li>Ouvre <a href="https://github.com/signup" target="_blank" rel="noopener">github.com/signup</a> (déjà un compte : passe à l'étape 2).</li>
+      <li>Entre ton adresse e-mail, un mot de passe et un nom d'utilisateur, puis suis les étapes (une petite vérification « je ne suis pas un robot »).</li>
+      <li>GitHub t'envoie un code par e-mail : recopie-le. Les questions qui suivent (équipe, usage…) peuvent être passées : <b>Skip</b>.</li>
     </ol>
-    <p class="note" style="margin:8px 0 0"><b>Android</b> : l'appli s'ouvre aussi dans Chrome (menu ⋮ → <b>Ajouter à l'écran d'accueil</b>), sans avoir été essayée. L'extension, elle, n'a pas d'équivalent simple : Orion n'existe que sur iPhone ; sur Android, colle les pages dans <b>Importer</b>.</p>
+
+    <h4>Étape 2 · Créer le jeton</h4>
+    <ol>
+      <li>Connecté à GitHub, ouvre <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Suivi%20Paris" target="_blank" rel="noopener">cette page</a> (« New personal access token (classic) »). GitHub peut redemander ton mot de passe.</li>
+      <li><b>Note</b> : « Suivi Paris » est déjà écrit.</li>
+      <li><b>Expiration</b> : choisis <b>No expiration</b> (sinon la synchronisation s'arrêtera le jour où il expire).</li>
+      <li><b>Select scopes</b> : seule la case <b>gist</b> doit être cochée (elle l'est déjà). Ne coche rien d'autre.</li>
+      <li>Tout en bas, bouton vert <b>Generate token</b>.</li>
+      <li>Le jeton s'affiche, il commence par <code>ghp_</code> : copie-le tout de suite (bouton de copie à droite). GitHub ne le montre qu'une fois ; perdu, il suffit d'en créer un autre.</li>
+    </ol>
+
+    <h4>Étape 3 · Activer la synchronisation ici</h4>
+    <ol>
+      <li>${relie ? "C'est fait : la synchronisation est active sur cet ordinateur." : "Colle le jeton dans le champ <b>ghp_…</b> tout en bas de ce cadre, puis <b>Activer</b>."}</li>
+      <li>Un bouton <b>Copier le code de liaison</b> apparaît : ce code (« SP1-… ») relie un appareil à ta synchronisation. Il donne accès à tes paris : ne le donne à personne.</li>
+    </ol>
+
+    <h4>Étape 4 · Installer l'appli sur l'iPhone</h4>
+    <ol>
+      <li>Sur l'iPhone, ouvre <b>Safari</b> (pas Chrome : seul Safari sait installer une appli web) et va sur ${lienAppli}.</li>
+      <li>Touche le bouton <b>Partager</b> (le carré avec une flèche vers le haut, en bas de l'écran), fais défiler et choisis <b>Sur l'écran d'accueil</b>, puis <b>Ajouter</b>.</li>
+      <li>Une icône Suivi Paris apparaît sur ton écran d'accueil : ouvre toujours l'appli <b>depuis cette icône</b>, pas depuis Safari (Safari et l'icône ne partagent pas les données).</li>
+      <li>La première ouverture prend jusqu'à une minute (l'appli se télécharge dans le téléphone). Ensuite, elle s'ouvre en quelques secondes, même sans réseau. Tes paris restent dans le téléphone.</li>
+    </ol>
+
+    <h4>Étape 5 · Relier l'iPhone à l'ordinateur</h4>
+    <ol>
+      <li>Ici, sur l'ordinateur : <b>Copier le code de liaison</b>.</li>
+      <li>Fais-le passer sur l'iPhone : AirDrop (sur Mac), une note iCloud, un message ou un e-mail à toi-même. Sur l'iPhone, appui long sur le code → <b>Copier</b>.</li>
+      <li>Dans l'appli sur l'iPhone : onglet <b>Mes données</b> → cadre <b>Avec l'ordinateur</b>, appui long dans le champ → <b>Coller</b>, puis <b>Lier</b>.</li>
+      <li>Tes paris arrivent en quelques secondes. Ensuite, tout ce que tu fais d'un côté (un pari importé, modifié, supprimé) arrive de l'autre à chaque ouverture.</li>
+    </ol>
+
+    <h4>Étape 6 · L'extension dans Orion, pour lire tes paris sur le téléphone</h4>
+    <p>Sur l'iPhone, seul le navigateur <b>Orion</b> accepte les extensions. Avec elle, tu ouvres ta page de paris et elle est lue toute seule, comme avec Chrome sur l'ordinateur.</p>
+    <ol>
+      <li>Installe <b>Orion Browser</b> (de Kagi, gratuit) depuis l'App Store.</li>
+      <li>Au premier lancement, Orion te fait choisir un <b>moteur de recherche</b> : prends par exemple <b>Google</b> (celui de Kagi devient payant après un essai).</li>
+      <li>Dans Orion : <b>•••</b> (en bas) → <b>Réglages</b>, et active la prise en charge des <b>extensions Chrome</b>.</li>
+      <li>Toujours sur l'iPhone, ouvre ${lienExtension} et télécharge le fichier. Dans l'app <b>Fichiers</b>, déplace-le dans <b>Sur mon iPhone → Orion</b> (appui long → Déplacer) : Orion n'installe bien que depuis ce dossier.</li>
+      <li>Dans Orion : <b>•••</b> → <b>Extensions</b> → <b>+</b> → choisis le fichier <b>suivi-paris-extension.zip</b>. Accepte qu'elle fonctionne sur les sites des bookmakers.</li>
+      <li>Ouvre la fenêtre de l'extension : <b>•••</b> → <b>Suivi Paris</b>. Dans <b>Sans l'appli (iPhone)</b>, colle le <b>même code de liaison</b> et touche <b>Lier</b>.</li>
+    </ol>
+
+    <h4>Au quotidien</h4>
+    <ol>
+      <li>Dans Orion, connecte-toi sur le site du bookmaker et ouvre <b>Mes paris</b> (et l'accueil, pour le solde). Une petite fenêtre Suivi Paris dit ce qui est lu.</li>
+      <li>Ce qui est lu reste dans l'extension, dans <b>Prêt à envoyer</b>, avec le détail des paris. Rien ne part tant que tu n'as pas décidé.</li>
+      <li>Quand tout est prêt : <b>Envoyer vers l'appli</b> (dans la fenêtre du site ou celle de l'extension). Tout part en une fois.</li>
+      <li>Ouvre l'appli Suivi Paris : elle récupère et enregistre tout (ou <b>Importer → Récupérer maintenant</b>).</li>
+    </ol>
+
+    <h4>Les mises à jour</h4>
+    <ul>
+      <li><b>L'appli iPhone</b> se met à jour seule, à l'ouverture.</li>
+      <li><b>L'appli de l'ordinateur</b> l'annonce d'elle-même par un bandeau ; un clic l'installe (ou <b>Mes données → Version</b>).</li>
+      <li><b>L'extension dans Orion</b> : sa fenêtre affiche « Nouvelle version », avec le lien. Envoie d'abord ce qui est prêt, puis réinstalle-la comme à l'étape 6 et recolle le code.</li>
+    </ul>
+
+    <p class="note"><b>Android</b> : l'appli s'ouvre dans Chrome (menu ⋮ → <b>Ajouter à l'écran d'accueil</b>), mais elle n'a pas été essayée. L'extension n'a pas d'équivalent simple (Orion n'existe que sur iPhone) : sur Android, copie la page de paris et colle-la dans <b>Importer</b>.</p>
   </details>`;
 }
 function blocSynchro(sy) {
@@ -2421,16 +2490,11 @@ function blocSynchro(sy) {
     <form class="actions" id="form-synchro"><input class="saisie" name="code" placeholder="SP1-…" autocomplete="off" aria-label="Code de liaison" style="flex:1;min-width:0">
       <button class="bouton" type="submit">Lier</button></form>`;
   else if (!sy.actif) corps = `${explicationTelephone()}
-    <h3 class="sous-titre-synchro">1. Relier par GitHub</h3>
-    <p class="discret" style="margin:0 0 10px">GitHub sert de relais : tes paris y passent dans un <b>gist secret</b> (un fichier privé de ton compte), <b>chiffrés</b> ; GitHub ne voit qu'un fichier illisible et la clé n'est que sur tes appareils. Gratuit.</p>
-    <ol class="etapes-favori" style="margin-bottom:12px">
-      <li>Pas de compte GitHub ? <a href="https://github.com/signup" target="_blank" rel="noopener">Crée-le</a> (gratuit, une adresse e-mail suffit).</li>
-      <li><a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Suivi%20Paris" target="_blank" rel="noopener">Crée un jeton</a> (« Personal access token, classic ») : coche seulement <b>gist</b>, expiration <b>No expiration</b>, puis <b>Generate token</b>.</li>
-      <li>Copie le jeton (il commence par <code>ghp_</code>), colle-le ici et active :</li></ol>
+    <p class="discret" style="margin:0 0 8px"><b>Étape 3</b> : colle ici le jeton GitHub (<code>ghp_…</code>), puis <b>Activer</b>.</p>
     <form class="actions" id="form-synchro"><input class="saisie" name="jeton" placeholder="ghp_…" autocomplete="off" aria-label="Jeton GitHub" style="flex:1;min-width:0">
       <button class="bouton" type="submit">Activer</button></form>`;
   else corps = `${!etat.app.mobile && sy.code ? `${explicationTelephone(true)}<div class="liaison"><div>
-      <p class="discret" style="margin:0 0 8px">Le <b>code de liaison</b> relie un appareil à ta synchronisation : fais-le passer sur le téléphone (AirDrop, Notes, un message à toi-même), puis colle-le dans l'appli (<b>Mes données → Avec l'ordinateur</b>) et dans l'extension Orion (<b>Sans l'appli → Lier</b>). Il donne accès à tes paris : ne le partage avec personne.</p>
+      <p class="discret" style="margin:0 0 8px">Le <b>code de liaison</b> relie un appareil à ta synchronisation : à coller dans l'appli iPhone (étape 5 du guide) et dans l'extension Orion (étape 6). Il donne accès à tes paris : ne le partage avec personne.</p>
       <div class="actions" style="margin:0"><button type="button" class="bouton" data-copier-code>Copier le code de liaison</button></div></div></div>` : ""}
     <div class="actions"><button type="button" class="bouton secondaire" data-synchro-maintenant>Synchroniser maintenant</button>
       <button type="button" class="bouton fantome danger" data-synchro-couper>${etat.app.mobile ? "Délier" : "Désactiver"}</button></div>`;
@@ -2535,6 +2599,7 @@ async function pageDonnees(main) {
   $$("[data-theme-choix]", main).forEach((bt) => bt.addEventListener("click", () => choisirTheme(bt.dataset.themeChoix)));
   const chercher = $("#chercher-maj", main);
   if (chercher) chercher.addEventListener("click", () => chercherMiseAJour(chercher, $("#maj", main)));
+  if (chercher && /[?&]maj=1/.test(location.hash)) { chercherMiseAJour(chercher, $("#maj", main)); $("#version", main).scrollIntoView({ block: "center" }); }
   if (sy) brancherSynchro(main, sy, () => pageDonnees(main));
   // Une base de l'autre appareil (iPhone ou ordinateur), ajoutée à celle-ci.
   const fusion = $("#fichier-fusion");
@@ -2586,4 +2651,27 @@ window.addEventListener("pagehide", () => {
   await chargerEtat();
   if (etat.app.distant) document.body.classList.add("distant");
   router();
+  annoncerMiseAJour();
 })();
+
+/* Sur l'ordinateur : une nouvelle version publiée est annoncée d'elle-même (une recherche par jour au plus), avec un
+   bouton qui l'installe. L'appli téléphone, elle, se met à jour seule à l'ouverture (mobile/sw.js). */
+async function annoncerMiseAJour() {
+  const a = etat.app;
+  if (!a || a.mobile || a.distant || a.demo || a.developpement) return;
+  try {
+    const derniere = Number(localStorage.getItem("maj-cherchee") || 0);
+    if (Date.now() - derniere < 24 * 3600e3) return;
+    localStorage.setItem("maj-cherchee", String(Date.now()));
+  } catch { /* stockage indisponible : on cherche quand même */ }
+  let info;
+  try { info = await api("/api/mise-a-jour"); } catch { return; }  // hors connexion : demain
+  if (!info || !info.disponible) return;
+  const b = document.createElement("div");
+  b.className = "bandeau-maj";
+  b.innerHTML = `<span><b>Suivi Paris ${esc(info.version)}</b> est disponible (tu as la ${esc(info.actuelle)}).</span>
+    <a class="bouton petit" href="#/donnees?maj=1">Voir et installer</a><button type="button" class="fermer-maj" aria-label="Plus tard">×</button>`;
+  $(".fermer-maj", b).addEventListener("click", () => b.remove());
+  $("a", b).addEventListener("click", () => setTimeout(() => b.remove(), 300));
+  document.body.append(b);
+}
