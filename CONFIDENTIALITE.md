@@ -58,3 +58,17 @@ désinstalle l'application et supprime ce dossier ; désinstaller l'extension ef
 ## Contact
 
 Une question : ouvre une discussion (*Issues*) sur https://github.com/ArthurD19/suivi-paris-versions.
+
+## Synchronisation avec l'iPhone (si tu l'actives)
+
+Désactivée par défaut. Activée (Mes données → Avec l'iPhone), l'ordinateur et l'iPhone s'échangent leur base de
+paris par un « gist » secret de **ton** compte GitHub, avec un jeton que tu crées (droit *gist* seulement). Chaque
+base y est compressée puis **chiffrée (AES-256-GCM)** avant de partir : la clé est créée sur ton ordinateur et n'est
+transmise qu'à ton iPhone, par le code de liaison ; ni GitHub ni personne d'autre ne peut lire le contenu. Le jeton
+et la clé restent sur tes deux appareils (fichier de réglages de l'ordinateur, stockage de l'appli sur l'iPhone).
+« Désactiver » supprime le gist.
+
+L'extension liée à la synchronisation (code de liaison collé dans sa fenêtre, utile sur l'iPhone avec Orion) dépose
+ce qu'elle lit, quand aucune appli ne lui répond, dans ce même gist, chiffré de la même façon ; l'appli (iPhone ou
+ordinateur) l'enregistre puis le retire. Sans code de liaison, l'extension n'envoie toujours rien qu'à l'appli de
+l'ordinateur.

@@ -74,7 +74,7 @@ et Brave.
   loupe* (par marché, simple ou combiné, cote boostée, course, bookmaker, mise, cote, mois, jour, heure,
   anticipation) et tes **plus beaux gains** (un clic ouvre le ticket). Filtres : période, comptes, sports.
 - **Une page par bookmaker** (barre de gauche) : ses chiffres, sa courbe, ses sports et ses derniers tickets.
-- **Importer** : l'extension (automatique), les favoris qui récupèrent tout un historique d'un coup, ou le
+- **Importer** : l'extension (automatique, et *Récupérer tout mon historique* pour tout rattraper d'un coup), ou le
   copier-coller d'une page. On y colle aussi des **messages de pronos Discord** : l'appli retrouve les paris
   correspondants et les marque « partagés ».
 - **Mes paris** : tous tes paris, avec recherche (« Pogacar », « Lombardie »…) et filtres (**En cours**, Gagné, Perdu,
@@ -106,12 +106,14 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 ### Betclic
 
 - **Paris** : *Mes paris* → onglet **Terminés**, et de temps en temps l'onglet **En cours** : c'est le seul endroit
-  où se lit la cote d'un pari (gains possibles ÷ mise), gardée ensuite quand il se règle.
+  où se lit la cote d'un pari, gardée ensuite quand il se règle. Un **freebet** s'y reconnaît (les gains possibles
+  valent mise × (cote − 1)) : il ne coûte rien s'il perd, et ne compte pas comme un dépôt. L'extension lit aussi
+  son icône « F » dans *Terminés* ; sur une page copiée à la main, coche *Freebet* dans **Modifier**.
 - **Solde** : relevé à chaque visite. Betclic n'affiche pas quel compte est connecté : si tu as plusieurs comptes
   Betclic, l'extension te demande sur la page à quel compte vont les paris et le solde (sans réponse, la page
   **Soldes** demande à qui est le solde lu).
 - **Dépôts et retraits** : *Mon compte* → l'historique des dépôts, puis celui des retraits.
-- **Tout l'historique d'un coup** : le favori Betclic (page *Importer*) fait défiler l'onglet *Terminés* jusqu'à la
+- **Tout l'historique d'un coup** : *Récupérer tout mon historique* (extension) fait défiler l'onglet *Terminés* jusqu'à la
   date choisie. Importe le fichier le jour même : Betclic écrit « Aujourd'hui » et « Hier » au lieu des dates.
 - **Ce que Betclic n'affiche pas** : la cote d'un simple déjà réglé (connue seulement si tu l'as vu en cours, ou
   pour un pari gagné : gains ÷ mise), le sport (deviné à partir du marché ; sinon « Sans sport », à corriger) et le
@@ -128,7 +130,7 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
   cycliste, dont la page ne donne pas la date).
 - **Dépôts et retraits** : *Mon compte* → *Historique de compte* → onglets **Dépôts** puis **Retraits**, toutes les
   pages. Un retrait pas encore versé (« en attente ») ne compte pas.
-- **Tout l'historique d'un coup** : le favori Winamax lit les pages demandées de l'historique de compte (par exemple
+- **Tout l'historique d'un coup** : *Récupérer tout mon historique* (extension) lit les pages demandées de l'historique de compte (par exemple
   `1-59`).
 
 ### Unibet
@@ -138,7 +140,7 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 - **Solde** : relevé à chaque visite.
 - **Dépôts et retraits** : *Mon compte* → *Transactions*, onglets **Compte** puis **Archivé** (d'avant la fusion). Les
   transferts de la fusion et les bonus ne comptent pas.
-- **Tout l'historique d'un coup** : le favori Unibet fait défiler l'onglet *Terminés* jusqu'à la date choisie.
+- **Tout l'historique d'un coup** : *Récupérer tout mon historique* (extension) fait défiler l'onglet *Terminés* jusqu'à la date choisie.
 
 ### PMU
 
@@ -148,12 +150,12 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 - **Solde** : les pages PMU Sport ne l'affichent pas ; il est relevé sur les autres pages de pmu.fr (passe par
   l'accueil).
 - **Dépôts et retraits** : *Mon historique de mouvements*, onglet **Appro / Retrait**.
-- **Tout l'historique d'un coup** : le favori PMU clique sur *Voir plus* à ta place jusqu'à la date choisie.
+- **Tout l'historique d'un coup** : *Récupérer tout mon historique* (extension) clique sur *Voir plus* à ta place jusqu'à la date choisie.
 
 ### ps3838
 
 - **Paris** : *Mon compte* → *Mes paris*, statut **Réglé**, puis *Recherche*. Le site limite une recherche à un
-  mois : refais-la mois par mois, ou utilise le favori ps3838, qui remonte par tranches de 30 jours. Le jour de
+  mois : refais-la mois par mois, ou utilise *Récupérer tout mon historique*, qui remonte par tranches de 30 jours. Le jour de
   l'événement (« … @ 2025-12-14 ») est retenu.
 - **Solde** : relevé à chaque visite.
 - **Dépôts et retraits** : ils passent par AsianConnect (voir plus bas).
@@ -167,7 +169,7 @@ colle-la dans **Importer** (paris) ou dans **Soldes** (dépôts et retraits).
 - **Solde** : relevé à chaque visite.
 - **Dépôts et retraits** : *Historique* → **Dépôts** puis **Retraits** ; l'extension déroule la liste elle-même.
 - **Sans l'extension** : le site empêche de sélectionner le texte ; le bouton **Copier le texte de la page** de
-  l'icône de l'extension le copie quand même. Pas de favori pour bet365.
+  l'icône de l'extension le copie quand même.
 - **À savoir** : la page n'a pas de référence de pari ; un pari y est reconnu à sa date (à la seconde) et à sa mise.
   Un simple n'y affiche que la sélection et la cote ; des gains qui ne valent pas mise × cote sont comptés en
   cash-out.
