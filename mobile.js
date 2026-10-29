@@ -120,7 +120,15 @@ def repondre(methode, chemin, requete, brut):
     const empreinte = enBase64(new Uint8Array(await crypto.subtle.digest("SHA-256", base)));
     if (empreinte !== cfg.empreinte) {
       await github(cfg, "PATCH", `/gists/${cfg.g}`, { files: { [FICHIER_IPHONE]: { content: await chiffrer(cfg, base) } } });
-      garderCfg({ empreinte, envoye_le: new Date().toISOString() });
+      cfg = garderCfg({ empreinte, envoye_le: new Date().toISOString() });
+    }
+    // La liste des comptes (site, nom) : l'extension, sans appli qui lui réponde, demande ainsi sur quel compte on est.
+    const comptes = ((await (await local("GET", "/api/etat")).json()).comptes || [])
+      .map((c) => ({ id: c.id, bookmaker: c.bookmaker, nom: c.nom }));
+    const texteComptes = JSON.stringify(comptes);
+    if (texteComptes !== cfg.comptes) {
+      await github(cfg, "PATCH", `/gists/${cfg.g}`, { files: { "suivi-paris-comptes.bin": { content: await chiffrer(cfg, new TextEncoder().encode(texteComptes)) } } });
+      garderCfg({ comptes: texteComptes });
     }
   }
   /* La boîte : les pages que l'extension (Orion sur l'iPhone, ou Chrome sans l'appli de l'ordinateur) a déposées,
@@ -138,7 +146,7 @@ def repondre(methode, chemin, requete, brut):
     const traitees = new Set();
     let nouveaux = 0;
     for (const p of pages) {
-      const corps = { texte: p.texte, bookmaker: p.bookmaker, capture_le: p.capture_le, url: p.url, compte_id: p.compte_id || null };
+      const corps = { texte: p.texte, bookmaker: p.bookmaker, capture_le: p.capture_le, url: p.url, compte_id: p.compte_id || null, compte_nom: p.compte_nom || null };
       let r = {};
       try { r = await (await local("POST", ROUTES_BOITE[p.type || "page"] || ROUTES_BOITE.page, corps)).json(); } catch { r = { statut: "erreur" }; }
       if (r.statut !== "choisir_compte" && r.statut !== "aucun_compte") traitees.add(p.id);
