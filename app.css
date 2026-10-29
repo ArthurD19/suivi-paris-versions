@@ -538,7 +538,16 @@ img.logo-bk { background: #fff; box-shadow: 0 0 0 1px var(--trait); }
   vertical-align: 2px; margin-left: 4px; }
 .ticket-actions { display: flex; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--ligne); }
 .bouton.petit { padding: 6px 12px; font-size: 13px; }
-.grille-tickets { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+/* Tous les tickets d'une rangée ont la même hauteur : le corps s'étire, le pied (mise, cote, gains) reste en bas. */
+.grille-tickets { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; align-items: stretch; }
+.grille-tickets .ticket { height: 100%; }
+.ticket .ticket-corps { flex: 1 1 auto; align-content: start; }
+.ticket .ticket-meta { min-height: 62px; align-items: flex-start; }
+/* Un ticket se modifie d'un toucher sur son en-tête ou ses sélections. */
+.ticket[data-ouvrable] .ticket-tete, .ticket[data-ouvrable] .ticket-corps { cursor: pointer; }
+.ticket[data-ouvrable] .ticket-corps:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.pari-titre[data-ouvrir] { cursor: pointer; }
+.pari-titre[data-ouvrir]:hover { color: var(--peloton); text-decoration: underline; text-underline-offset: 3px; }
 
 .bandeau-partages { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 18px; margin-bottom: 14px;
   border-radius: 18px; background: var(--peloton-clair); color: var(--peloton-fonce); }
@@ -943,8 +952,10 @@ body.mobile-app .quitter, body.mobile-app .menu a[data-page="iphone"] { display:
 .statut-synchro { margin: 0 0 12px; font-size: 13px; font-weight: 700; }
 .statut-synchro.ok { color: var(--gain); } .statut-synchro.ko { color: var(--perte); }
 .liaison { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
-.qr-liaison { background: #fff; padding: 8px; border-radius: 12px; line-height: 0; }
-.qr-liaison svg { width: 150px; height: 150px; }
+.explication-telephone { margin: 0 0 16px; padding: 12px 14px; border-radius: 14px; background: var(--fond); border: 1px solid var(--trait); }
+.explication-telephone summary { cursor: pointer; font-weight: 800; }
+.explication-telephone[open] summary { margin-bottom: 8px; }
+.sous-titre-synchro { font-size: 15px; margin: 4px 0 6px; }
 .liaison > div:last-child { flex: 1; min-width: 220px; }
 
 /* Appli iPhone : rien ne déborde sur les côtés, et un champ touché ne fait pas zoomer Safari (16 px au moins). */

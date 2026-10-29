@@ -1475,7 +1475,7 @@ async function pageParis(main) {
           const memes = etat.app.comptes.filter((c) => c.bookmaker === l.bookmaker);
           return `<tr data-bookmaker="${esc(l.bookmaker)}" data-reference="${esc(l.reference)}">
             <td class="petit cellule-date">${celluleDate(l)}</td>
-            <td class="cellule-pari"><div class="pari-titre">${sportEmoji(l.sport)} ${esc(l.resume)}</div><div class="pari-sous">${esc(l.categorie_marche)}</div></td>
+            <td class="cellule-pari"><div class="pari-titre" data-ouvrir title="Modifier ce pari">${sportEmoji(l.sport)} ${esc(l.resume)}</div><div class="pari-sous">${esc(l.categorie_marche)}</div></td>
             <td class="cellule-compte"><select data-champ="compte" aria-label="Compte">${memes.map((c) =>
               `<option value="${c.id}" ${c.id === l.compte_id ? "selected" : ""}>${esc(c.nom)} (${esc(libelleBookmaker(c.bookmaker))})</option>`).join("")}</select></td>
             <td class="cellule-sport"><select data-champ="sport" aria-label="Sport">${[...new Set([l.sport, ...sports])].map((s) =>
@@ -1538,6 +1538,10 @@ async function pageParis(main) {
     b.disabled = false;
   }));
   $$("[data-modifier]", main).forEach((b) => b.addEventListener("click", () => {
+    const tr = b.closest("tr");
+    ouvrirModification(parCle.get(`${tr.dataset.bookmaker}|${tr.dataset.reference}`), relancer);
+  }));
+  $$("[data-ouvrir]", main).forEach((b) => b.addEventListener("click", () => {
     const tr = b.closest("tr");
     ouvrirModification(parCle.get(`${tr.dataset.bookmaker}|${tr.dataset.reference}`), relancer);
   }));
@@ -1737,7 +1741,7 @@ function ticketHTML(l, { actions = true } = {}) {
   const montantFinal = l.etat === "en_cours"
     ? `<small>Gain potentiel</small><b>${potentiel ? euros(potentiel) : "—"}</b>`
     : `<small>${l.etat === "annule" ? "Remboursé" : "Gains"}</small><b class="${l.etat === "gagne" || l.etat === "cashout" ? "gain" : ""}">${euros(l.gains ?? 0)}</b>`;
-  return `<article class="ticket etat-${esc(l.etat)}" style="--bk:${th.fond};--bk-fonce:${th.fonce};--bk-accent:${th.accent}" data-bookmaker="${esc(l.bookmaker)}" data-reference="${esc(l.reference)}">
+  return `<article class="ticket etat-${esc(l.etat)}" ${actions ? "data-ouvrable" : ""} style="--bk:${th.fond};--bk-fonce:${th.fonce};--bk-accent:${th.accent}" data-bookmaker="${esc(l.bookmaker)}" data-reference="${esc(l.reference)}">
     <header class="ticket-tete">
       ${logoBk(l.bookmaker)}
       <span class="ticket-type">${esc(libelleType(l))}${l.cote_boostee ? ` <span class="boost" title="Cote boostée">⚡</span>` : ""}</span>
@@ -1782,6 +1786,11 @@ function brancherTickets(conteneur, lignes, apres) {
     if (m) m.addEventListener("click", () => ouvrirModification(l, apres));
     const s = $("[data-supprimer-ticket]", t);
     if (s) s.addEventListener("click", () => supprimerPari(l, apres));
+    // Toucher l'en-tête ou les sélections ouvre la modification (sans aller chercher le bouton).
+    if (t.hasAttribute("data-ouvrable")) $$(".ticket-tete, .ticket-corps", t).forEach((zone) => zone.addEventListener("click", (e) => {
+      if (e.target.closest("button, a, select, input")) return;
+      ouvrirModification(l, apres);
+    }));
     const p = $("[data-partager]", t);
     if (p) p.addEventListener("click", async () => {
       try {
@@ -2386,23 +2395,42 @@ async function chercherMiseAJour(bouton, zone) {
 /* La synchronisation avec l'autre appareil (suivi_paris/synchro.py, mobile/mobile.js) : sur l'ordinateur, un jeton
    GitHub l'active et donne le code de liaison ; sur l'iPhone, ce code la branche. */
 const quandSynchro = (iso) => (iso ? fmtDateHeure.format(new Date(iso)) : "jamais");
+/* Sur l'ordinateur : comment avoir l'appli sur le téléphone. `relie` : la synchronisation est déjà active. */
+function explicationTelephone(relie = false) {
+  const adresse = etat.app.adresse_iphone;
+  return `<details class="explication-telephone" ${relie ? "" : "open"}><summary>L'appli sur ton téléphone</summary>
+    <ol class="etapes-favori">
+      ${relie ? "" : "<li>Relie l'ordinateur à GitHub, ci-dessous : c'est par là que les paris passent d'un appareil à l'autre.</li>"}
+      <li>Sur l'iPhone, ouvre <a href="${esc(adresse)}" target="_blank" rel="noopener">${esc(adresse.replace("https://", ""))}</a> dans <b>Safari</b>, puis <b>Partager → Sur l'écran d'accueil</b>. Ouvre l'appli depuis cette icône : elle tourne dans le téléphone, tes paris y restent.</li>
+      <li>Dans l'appli : <b>Mes données → Avec l'ordinateur</b>, colle le code de liaison. Elle récupère alors tous tes paris, et tout ce que tu fais d'un côté arrive de l'autre.</li>
+      <li>Pour lire tes paris depuis le téléphone : le navigateur <b>Orion</b> (App Store) avec l'extension Suivi Paris, liée avec le même code.</li>
+    </ol>
+    <p class="note" style="margin:8px 0 0"><b>Android</b> : l'appli s'ouvre aussi dans Chrome (menu ⋮ → <b>Ajouter à l'écran d'accueil</b>), sans avoir été essayée. L'extension, elle, n'a pas d'équivalent simple : Orion n'existe que sur iPhone ; sur Android, colle les pages dans <b>Importer</b>.</p>
+  </details>`;
+}
 function blocSynchro(sy) {
   const autre = etat.app.mobile ? "l'ordinateur" : "l'iPhone";
   const statut = sy.actif ? `<p class="statut-synchro ${sy.erreur ? "ko" : "ok"}">${sy.erreur ? `⚠ ${esc(sy.erreur)}`
     : `● Synchronisée · envoyée le ${esc(quandSynchro(sy.envoye_le))} · reçue de ${autre} le ${esc(quandSynchro(sy.recu_le))}`}</p>` : "";
   let corps;
   if (!sy.possible) corps = `<p class="note">${etat.app.mobile ? "Ce téléphone ne permet pas le chiffrement (iOS 16.4 ou plus récent)." : "Il manque le module de chiffrement : relance l'appli (il s'installe tout seul)."}</p>`;
-  else if (etat.app.mobile && !sy.actif) corps = `<p class="discret" style="margin:0 0 12px">Sur l'ordinateur : <b>Mes données → Avec l'iPhone</b>, copie le code de liaison (ou scanne son QR code avec l'appareil photo, puis « Copier »), et colle-le ici.</p>
+  else if (etat.app.mobile && !sy.actif) corps = `<ol class="etapes-favori" style="margin:0 0 12px">
+      <li>Sur l'ordinateur : <b>Mes données → Avec l'iPhone</b>, active la synchronisation (jeton GitHub).</li>
+      <li>Copie le <b>code de liaison</b> et fais-le passer sur ce téléphone (AirDrop, Notes, un message à toi-même).</li>
+      <li>Colle-le ici, puis <b>Lier</b>. Le même code se colle aussi dans l'extension (Orion).</li></ol>
     <form class="actions" id="form-synchro"><input class="saisie" name="code" placeholder="SP1-…" autocomplete="off" aria-label="Code de liaison" style="flex:1;min-width:0">
       <button class="bouton" type="submit">Lier</button></form>`;
-  else if (!sy.actif) corps = `<p class="discret" style="margin:0 0 10px">Tes paris passent tout seuls entre l'ordinateur et l'iPhone, chiffrés : GitHub (où ils transitent, dans un gist secret) ne voit qu'un fichier illisible ; la clé n'est que sur tes deux appareils.</p>
+  else if (!sy.actif) corps = `${explicationTelephone()}
+    <h3 class="sous-titre-synchro">1. Relier par GitHub</h3>
+    <p class="discret" style="margin:0 0 10px">GitHub sert de relais : tes paris y passent dans un <b>gist secret</b> (un fichier privé de ton compte), <b>chiffrés</b> ; GitHub ne voit qu'un fichier illisible et la clé n'est que sur tes appareils. Gratuit.</p>
     <ol class="etapes-favori" style="margin-bottom:12px">
-      <li><a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Suivi%20Paris" target="_blank" rel="noopener">Crée un jeton GitHub</a> : coche seulement <b>gist</b>, expiration <b>No expiration</b>, puis <b>Generate token</b>.</li>
-      <li>Colle-le ici et active :</li></ol>
+      <li>Pas de compte GitHub ? <a href="https://github.com/signup" target="_blank" rel="noopener">Crée-le</a> (gratuit, une adresse e-mail suffit).</li>
+      <li><a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Suivi%20Paris" target="_blank" rel="noopener">Crée un jeton</a> (« Personal access token, classic ») : coche seulement <b>gist</b>, expiration <b>No expiration</b>, puis <b>Generate token</b>.</li>
+      <li>Copie le jeton (il commence par <code>ghp_</code>), colle-le ici et active :</li></ol>
     <form class="actions" id="form-synchro"><input class="saisie" name="jeton" placeholder="ghp_…" autocomplete="off" aria-label="Jeton GitHub" style="flex:1;min-width:0">
       <button class="bouton" type="submit">Activer</button></form>`;
-  else corps = `${!etat.app.mobile && sy.code ? `<div class="liaison">${sy.qr ? `<div class="qr-liaison">${sy.qr}</div>` : ""}<div>
-      <p class="discret" style="margin:0 0 8px">Sur l'iPhone : <b>Mes données → Avec l'ordinateur</b>, colle ce code (ou scanne le QR code avec l'appareil photo, puis « Copier »). Il donne accès à tes paris : ne le partage avec personne.</p>
+  else corps = `${!etat.app.mobile && sy.code ? `${explicationTelephone(true)}<div class="liaison"><div>
+      <p class="discret" style="margin:0 0 8px">Le <b>code de liaison</b> relie un appareil à ta synchronisation : fais-le passer sur le téléphone (AirDrop, Notes, un message à toi-même), puis colle-le dans l'appli (<b>Mes données → Avec l'ordinateur</b>) et dans l'extension Orion (<b>Sans l'appli → Lier</b>). Il donne accès à tes paris : ne le partage avec personne.</p>
       <div class="actions" style="margin:0"><button type="button" class="bouton" data-copier-code>Copier le code de liaison</button></div></div></div>` : ""}
     <div class="actions"><button type="button" class="bouton secondaire" data-synchro-maintenant>Synchroniser maintenant</button>
       <button type="button" class="bouton fantome danger" data-synchro-couper>${etat.app.mobile ? "Délier" : "Désactiver"}</button></div>`;

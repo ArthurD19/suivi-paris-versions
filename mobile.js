@@ -27,7 +27,22 @@
   // Pas de zoom au pincement (Safari ignore parfois la consigne de la page) : l'appli garde la taille de l'écran.
   document.addEventListener("gesturestart", (e) => e.preventDefault(), { passive: false });
 
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  // Une nouvelle version publiée : le service worker change, s'installe, et l'appli se recharge une fois dessus
+  // (pendant le démarrage seulement, pour ne rien interrompre). Vérifiée à chaque retour dans l'appli.
+  if ("serviceWorker" in navigator) {
+    const avait = Boolean(navigator.serviceWorker.controller);
+    let demarrage = true;
+    setTimeout(() => { demarrage = false; }, 20000);
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!avait) return;  // première installation : rien à recharger
+      if (demarrage) { location.reload(); return; }
+      if (window.toast) window.toast("Nouvelle version prête : ferme et rouvre l'appli");
+    });
+    navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then((reg) => {
+      reg.update().catch(() => {});
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
+    }).catch(() => {});
+  }
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
   let py = null;
