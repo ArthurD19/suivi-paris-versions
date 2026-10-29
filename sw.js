@@ -4,7 +4,7 @@
    EMPREINTE (mise par outils/mobile.py) change dès qu'un fichier de l'appli change, même sans nouveau numéro de
    version : ce fichier change donc lui aussi, le téléphone installe la nouvelle version et jette l'ancienne. Python
    (Pyodide, ~30 Mo) a son propre cache, gardé tant que sa version ne change pas. */
-const EMPREINTE = "1.5.0-479956d117ba";
+const EMPREINTE = "1.5.0-667c0d3809c2";
 const CACHE = `suivi-paris-${EMPREINTE}`;
 const CACHE_PYTHON = "suivi-paris-pyodide-0.27.2";
 
