@@ -1623,7 +1623,7 @@ async function pageComptes(main) {
                 <span class="discret petit">${nbParisDepuis(c)}${c.identifiant ? `, compte reconnu : ${esc(c.identifiant)}` : ""}</span>
                 ${dernierPari(c)}
               </div>
-              <button class="bouton fantome" data-supprimer ${c.n_paris ? `disabled title="Déplace d'abord ses paris vers un autre compte"` : ""}>Supprimer</button>
+              <button class="bouton fantome danger" data-supprimer>Supprimer</button>
             </div>`).join("") : `<p class="discret">Aucun compte ${esc(b.libelle)} pour l'instant.</p>`}
         </section>`;
       }).join("")}
@@ -1658,8 +1658,15 @@ async function pageComptes(main) {
       catch (err) { toast(err.message, true); }
     }));
     $("[data-supprimer]", ligne).addEventListener("click", async () => {
-      if (!confirm(`Supprimer le compte « ${compteParId(id).nom} » ?`)) return;
-      try { await api(`/api/comptes/${id}`, { methode: "DELETE" }); toast("Compte supprimé"); pageComptes(main); }
+      const c = compteParId(id);
+      const nom = `${libelleBookmaker(c.bookmaker)} – ${c.nom}`;
+      // Un compte avec des paris : ils partent avec lui (sur confirmation), un import les ramènera.
+      const tout = c.n_paris > 0;
+      const message = tout
+        ? `Supprimer le compte « ${nom} » ET ses ${c.n_paris} paris, ses dépôts et retraits ?\n\nPour les garder, déplace-les d'abord vers un autre compte (Mes paris → Compte). Un nouvel import les ramènera.`
+        : `Supprimer le compte « ${nom} » ?`;
+      if (!confirm(message)) return;
+      try { await api(`/api/comptes/${id}${tout ? "?tout=1" : ""}`, { methode: "DELETE" }); toast(tout ? "Compte et paris supprimés" : "Compte supprimé"); etat.dejaAnime = false; pageComptes(main); }
       catch (err) { toast(err.message, true); }
     });
   });
