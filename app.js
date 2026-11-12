@@ -46,7 +46,7 @@ const initiale = (nom) => (nom || "?").trim().charAt(0).toUpperCase();
 
 const SPORTS = {
   Cyclisme: ["🚴", "#F5B700"], Tennis: ["🎾", "#E2663B"], "Tennis de table": ["🏓", "#C2410C"], Football: ["⚽", "#2F80ED"], Basketball: ["🏀", "#1FB5A8"],
-  Moto: ["🏍️", "#EB4D7C"], Ski: ["⛷️", "#3BA3D9"], "Sports d'hiver": ["⛸️", "#6CB4E8"], Golf: ["⛳", "#2E9E5B"], MMA: ["🥊", "#B23A48"], "Formule 1": ["🏎️", "#3D3D5C"], "Athlétisme": ["🏃", "#00A3E0"],
+  Moto: ["🏍️", "#EB4D7C"], Ski: ["⛷️", "#3BA3D9"], "Sports d'hiver": ["⛸️", "#6CB4E8"], Golf: ["⛳", "#2E9E5B"], MMA: ["🥊", "#B23A48"], "Formule 1": ["🏎️", "#3D3D5C"], "Formule 2": ["🏎️", "#5A6B8C"], "Athlétisme": ["🏃", "#00A3E0"],
   "Hockey sur glace": ["🏒", "#7A8CA8"], Rugby: ["🏉", "#8B5E3C"], Handball: ["🤾", "#A35BE0"], Judo: ["🥋", "#6B7280"], Rallye: ["🚗", "#B7791F"],
   "Volley-ball": ["🏐", "#F2994A"], "Football américain": ["🏈", "#9C6644"], Boxe: ["🥊", "#D64545"],
   Biathlon: ["🎯", "#2D9CDB"], "Ski alpin": ["⛷️", "#3BA3D9"], "Ski de fond": ["🎿", "#56CCF2"],
