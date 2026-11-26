@@ -56,7 +56,7 @@ const sportEmoji = (s) => (SPORTS[s] || SPORTS.Autre)[0];
 const sportCouleur = (s) => (SPORTS[s] || SPORTS.Autre)[1];
 /* Pastilles des bookmakers : une initiale sur une couleur. Une image déposée dans le dossier « logos » des données
    (betclic.png…) la remplace. */
-const BOOKMAKERS_STYLE = { betclic: ["B", "#E4002B"], winamax: ["W", "#16141F"], unibet: ["U", "#147B45"], ps3838: ["PS", "#0B2D5B"], pmu: ["P", "#00843D"], bet365: ["365", "#126E51"], piwi247: ["PW", "#14305E"], olybet: ["O", "#D98E04"], bwin: ["bw", "#1E1E1E"], sportaza: ["SZ", "#5B2BE0"], netbet: ["NB", "#C8102E"], orbitx: ["OX", "#7BB51E"] };
+const BOOKMAKERS_STYLE = { betclic: ["B", "#E4002B"], winamax: ["W", "#16141F"], unibet: ["U", "#147B45"], ps3838: ["PS", "#0B2D5B"], pmu: ["P", "#00843D"], bet365: ["365", "#126E51"], piwi247: ["PW", "#14305E"], olybet: ["O", "#D98E04"], bwin: ["bw", "#1E1E1E"], sportaza: ["SZ", "#5B2BE0"], netbet: ["NB", "#C8102E"], orbitx: ["OX", "#7BB51E"], pokerstars: ["PK", "#D70022"] };
 const FAMILLES_EMOJI = {
   Cyclisme: "🚴", "Sports collectifs": "⚽", Raquettes: "🎾", "Sports mécaniques": "🏎️", "Sports d'hiver": "⛷️",
   Combat: "🥊", Combinés: "🧩", "Autres sports": "🎯",
@@ -1141,6 +1141,7 @@ const GUIDE = {
   olybet: { paris: "<b>Historique des paris</b>, puis clique sur chaque pari", solde: "À chaque visite", mvts: PAS_LU },
   bwin: { paris: "<i>Mes paris</i> → <b>Ouvert</b>, <b>Évalué</b> (l'extension lit 90 jours par 90 jours)", solde: "À chaque visite", mvts: PAS_LU },
   sportaza: { paris: "<i>Mes paris</i> → <b>Calculé</b>, <b>Ouvrir</b> (l'extension ouvre chaque pari)", solde: "À chaque visite (« Solde réel »)", mvts: { ou: "<b>Historique des transactions</b>, filtres <i>Dépôt</i> et <i>Retraits</i>" } },
+  pokerstars: { paris: "<i>Mes paris</i> → <b>Terminés</b>, puis <b>En cours</b>", solde: "À chaque visite", mvts: { ou: "<i>Dépôts et retraits</i> → <b>Historique des transactions</b>" } },
   netbet: { paris: "<i>Mes paris</i> → <b>Paris terminés</b>, page après page", solde: "À chaque visite (« Réel »)", mvts: PAS_LU },
 };
 const MODES = { auto: ["Automatique", "ok"], main: ["À la main", "main"], ac: ["Par AsianConnect", "ac"] };
@@ -1726,6 +1727,7 @@ const THEMES_BK = {
   bwin: { fond: "#2A2A2A", fonce: "#000000", accent: "#FFCC00" },
   sportaza: { fond: "#5B2BE0", fonce: "#2A1170", accent: "#FFD23F" },
   netbet: { fond: "#C8102E", fonce: "#5E0715", accent: "#FFFFFF" },
+  pokerstars: { fond: "#D70022", fonce: "#5C000F", accent: "#FFFFFF" },
   orbitx: { fond: "#3E4A12", fonce: "#1C2208", accent: "#B6E33A" },
 };
 const themeBk = (nom) => THEMES_BK[nom] || { fond: (BOOKMAKERS_STYLE[nom] || [, "#5B3DF5"])[1], fonce: "#1B1340", accent: "#FFFFFF" };
