@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Extension Suivi Paris</title>
+  <!-- Page de mise à jour de l'extension, à ouvrir dans Orion (iPhone). L'extension y garde une copie de sa liaison
+       avec la synchronisation (voir extension/liaison.js) et la reprend après une réinstallation. -->
+  <style>
+    :root { --fond: #F3F5FB; --carte: #FFFFFF; --encre: #0B1020; --brume: #5B6275; --bleu: #2450F5; --jaune: #FFC928;
+            --ok: #0E8A55; --trait: #E2E6F0; color-scheme: light dark; }
+    @media (prefers-color-scheme: dark) {
+      :root { --fond: #0B1020; --carte: #151B2E; --encre: #F3F5FB; --brume: #A3AAC0; --ok: #4ED39A; --trait: #26304A; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--fond); color: var(--encre); font: 16px/1.5 -apple-system, system-ui, sans-serif;
+           padding: max(20px, env(safe-area-inset-top)) 16px 32px; }
+    main { max-width: 520px; margin: 0 auto; }
+    h1 { font-size: 24px; font-style: italic; font-weight: 900; margin: 8px 0 4px; }
+    h1 span { color: var(--bleu); }
+    .sous { color: var(--brume); margin: 0 0 18px; }
+    .carte { background: var(--carte); border: 1px solid var(--trait); border-radius: 18px; padding: 16px; margin-bottom: 14px; }
+    #etat-liaison { font-weight: 700; }
+    #etat-liaison[data-etat="ok"] { color: var(--ok); }
+    #etat-liaison[data-etat="ok"]::before { content: "✓ "; }
+    ol { margin: 0; padding-left: 22px; }
+    li { margin: 6px 0; }
+    .bouton { display: block; text-align: center; background: var(--bleu); color: #fff; text-decoration: none; font-weight: 800;
+              padding: 14px; border-radius: 14px; margin: 12px 0 4px; }
+    small { color: var(--brume); }
+    b.jaune { background: var(--jaune); color: #0B1020; padding: 0 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Suivi Paris · <span>extension</span></h1>
+  <p class="sous">Mettre à jour l'extension dans Orion, sans recoller le code de liaison.</p>
+
+  <section class="carte">
+    <p id="etat-liaison" data-etat="info">Ouvre cette page dans <b>Orion</b>, le navigateur où l'extension est installée.</p>
+  </section>
+
+  <section class="carte">
+    <ol>
+      <li>Si la fenêtre de l'extension a des éléments <b>prêts à envoyer</b>, envoie-les d'abord : une réinstallation les efface.</li>
+      <li>Télécharge la nouvelle version <span id="version"></span> et, dans Fichiers, range-la dans <b>Sur mon iPhone → Orion</b>.
+        <a class="bouton" href="suivi-paris-extension.zip" download>Télécharger l'extension</a>
+      </li>
+      <li>Orion : ••• → <b>Extensions</b>, supprime Suivi Paris, touche <b>+</b> et choisis le fichier. Accepte les sites.</li>
+      <li>Cette page se rouvre toute seule et <b class="jaune">relie l'extension</b> : rien à recoller.</li>
+    </ol>
+  </section>
+  <small>La liaison reste dans ce téléphone : elle n'est envoyée nulle part.</small>
+</main>
+<script>
+  fetch("extension.json", { cache: "no-cache" }).then((r) => r.json()).then((x) => {
+    if (x && x.version) document.getElementById("version").textContent = `(${x.version})`;
+  }).catch(() => {});
+</script>
+</body>
+</html>
